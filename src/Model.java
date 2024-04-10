@@ -18,13 +18,13 @@ public class Model {
     private final Map<Integer, Leisure> leisures = new HashMap<>();
     private final Map<Integer, Water> waters = new HashMap<>();
     private final Map<Integer, Landuse> landuses = new HashMap<>();
-//    protected final Map<String, Double> wayIdHashMap = new HashMap<String, Double>();
+    protected final Map<String, Integer> wayIdHashMap = new HashMap<String, Integer>();
 
     private double minLat = 0.0;
     private double minLon = 0.0;
     private double maxLat = 0.0;
     private double maxLon = 0.0;
-    private double metricScale = 1.0;
+    private final double metricScale = 1.0;
 
     public Model(List<Byte> xml) {
         LoadData(xml);
@@ -127,7 +127,7 @@ public class Model {
                 String id = nodeElement.attr("id");
                 double lat = Double.parseDouble(nodeElement.attr("lat"));
                 double lon = Double.parseDouble(nodeElement.attr("lon"));
-                nodes.put(id, new Node(lon, lat));
+                nodes.put(id, new Node(lon, lat, id));
             }
 
             // Parse ways
@@ -143,7 +143,7 @@ public class Model {
                     Way newWay = new Way(id, (int)wayNum);
                     // Add the new way in Ways map
                     ways.put(id, newWay);
-//                    wayIdHashMap.put(id, wayNum);
+                    wayIdHashMap.put(id, (int) wayNum);
 
                     // Iterate through children nodes
                     for (Element child : way.children()) {

@@ -1,24 +1,27 @@
 public class Node {
     private double lon;
     private double lat;
+    private final String ref;
 
-    public Node(double longitude, double latitude) {
+    public Node(double longitude, double latitude, String ref) {
         this.lon = longitude;
         this.lat = latitude;
+        this.ref = ref;
     }
 
     public Node(Node node) {
         this.lon = node.getLon();
         this.lat = node.getLat();
+        this.ref = node.getRef();
     }
 
     public double getLon() {
         return lon;
     }
-
     public double getLat() {
         return lat;
     }
+    public String getRef() { return ref; }
 
     public void setLon(double lon) {
         this.lon = lon;

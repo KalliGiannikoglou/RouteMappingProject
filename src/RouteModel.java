@@ -5,7 +5,7 @@ import java.util.Map;
 
 public class RouteModel extends Model {
 
-    public static class RMNode extends Node {
+    public class RMNode extends Node {
         protected int index;
         protected RouteModel parentModel;
         protected Node prev;
@@ -14,39 +14,60 @@ public class RouteModel extends Model {
         protected boolean visited = false;
         protected List<Node> neighbors = new ArrayList<>();
 
-        public int getIndex() {
-            return index;
-        }
+        public int getIndex() { return index; }
 
-        public RMNode(int idx, RouteModel searchModel, Node node) {
+        public RMNode( int idx, RouteModel parentModel, Node node) {
             super(node);
-            index = idx;
-            parentModel = searchModel;
+            this.parentModel = parentModel;
+            // index = idx;
         }
 
-        public void findNeighbors() {
-            List<Road> roads = parentModel.getNodeToRoad().get(this.index);
-            if (roads == null) {
-                return;
-            }
+        public Node findClosestNode(int idx, RouteModel parentModel, float lon, float lat, String ref) {
+            RMNode input = new RMNode(idx, parentModel, new Node(lon, lat, ref));
 
-            for (Road road : roads) {
-                List<Integer> nodes = parentModel.getWays().get(road.way).nodes;
-                Node newNeighbor = findNeighbor(nodes);
-                if (newNeighbor != null) {
-                    this.neighbors.add(newNeighbor);
+            float minDist = Float.MAX_VALUE;
+            float dist;
+            int closestIdx = -1;
+
+            for ( Road road : getRoads().values()) {
+                if (road.getType() != Road.Type.Footway) {
+                    for (String nodeId : getWays().get(road.getRef()).getNodes()) {
+                        System.out.println(getNodeToRoad());
+//                        int nodeIdx = parentModel.wayIdHashMap.get(nodeId);
+//                        RMNode node =
+//                        dist = input.manhattanDist(parentModel.getRouteModelNodes());
+//                        if (dist < minDist) {
+//                            closestIdx = nodeIdx;
+//                            minDist = dist;
+//                        }
+                    }
                 }
             }
+            return getRouteModelNodes().get(closestIdx);
         }
 
-        public RMNode findNeighbor(List<Integer> nodeIndices) {
+
+        public void findNeighbors() {
+            List<Road> roads = parentModel.getNodeToRoad().get(this.getRef());
+            if (roads == null)
+                return;
+
+            for (Road road : roads) {
+                List<String> nodes = parentModel.getWays().get(road.getRef()).nodes;
+                Node newNeighbor = findNeighbor(nodes);
+                if (newNeighbor != null)
+                    this.neighbors.add(newNeighbor);
+            }
+        }
+
+        public RMNode findNeighbor(List<String> nodeIndices) {
             RMNode closestNode = null;
 
-            for (int nodeIndex : nodeIndices) {
-                RMNode node = parentModel.getSNodes().get(nodeIndex);
+            for (String nodeIndex : nodeIndices) {
+                RMNode node = parentModel.getRouteModelNodes().get(getIndex());
                 if (this.manhattanDist(node) != 0 && !node.visited) {
                     if (closestNode == null || this.manhattanDist(node) < this.manhattanDist(closestNode)) {
-                        closestNode = parentModel.getSNodes().get(nodeIndex);
+                        closestNode = parentModel.getRouteModelNodes().get(getIndex());;
                     }
                 }
             }
@@ -58,7 +79,7 @@ public class RouteModel extends Model {
         }
     }
 
-    private final List<Node> routeModelNodes = new ArrayList<>();
+    private final List<RMNode> routeModelNodes = new ArrayList<>();
     private final Map<String, List<Road>> nodeToRoad = new HashMap<String, List<Road>>();
 
     public RouteModel(List<Byte> xml) {
@@ -67,12 +88,16 @@ public class RouteModel extends Model {
         createHashmap();
     }
 
+    public Map<String, List<Road>> getNodeToRoad() { return nodeToRoad; }
+
+    public List<RMNode> getRouteModelNodes(){ return routeModelNodes; }
+
 
     private void createRouteModelNodes() {
         int counter = 0;
         for (Map.Entry<String, Node> entry : getNodes().entrySet()) {
             Node node = entry.getValue();
-            Node newRmNode = new RMNode(counter, this, node);
+            RMNode newRmNode = new RMNode(counter, this, node);
             routeModelNodes.add(newRmNode);
             counter++;
         }
@@ -93,6 +118,7 @@ public class RouteModel extends Model {
                 }
             }
         }
+
 
         // Iterate over nodeToRoad "node_id: (type, wayNum, wayId) , ( ) ..."
 //        nodeToRoad.forEach((key, roadList) -> {
