@@ -19,31 +19,38 @@ public class RouteModel extends Model {
         public RMNode( int idx, RouteModel parentModel, Node node) {
             super(node);
             this.parentModel = parentModel;
-            // index = idx;
+            this.index = idx;
         }
 
         public Node findClosestNode(int idx, RouteModel parentModel, float lon, float lat, String ref) {
             RMNode input = new RMNode(idx, parentModel, new Node(lon, lat, ref));
 
             float minDist = Float.MAX_VALUE;
-            float dist;
+            double dist;
             int closestIdx = -1;
 
             for ( Road road : getRoads().values()) {
                 if (road.getType() != Road.Type.Footway) {
                     for (String nodeId : getWays().get(road.getRef()).getNodes()) {
-                        System.out.println(getNodeToRoad());
-//                        int nodeIdx = parentModel.wayIdHashMap.get(nodeId);
-//                        RMNode node =
-//                        dist = input.manhattanDist(parentModel.getRouteModelNodes());
-//                        if (dist < minDist) {
-//                            closestIdx = nodeIdx;
-//                            minDist = dist;
-//                        }
+                        System.out.print(nodeId);
+                        int nodeIdx = parentModel.wayIdHashMap.get(nodeId);
+                        dist = input.manhattanDist( searchIdx(nodeIdx) );
+                        if (dist < minDist) {
+                            closestIdx = nodeIdx;
+                            minDist = (float) dist;
+                        }
                     }
                 }
             }
             return getRouteModelNodes().get(closestIdx);
+        }
+
+        public RMNode searchIdx (int index){
+            for(RMNode node: parentModel.getRouteModelNodes()){
+                if(node.getIndex() == index)
+                    return node;
+            }
+            return null;
         }
 
 
