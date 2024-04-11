@@ -1,12 +1,17 @@
 public class Node {
     private double lon;
     private double lat;
-    private final String ref;
+    private String ref;
 
     public Node(double longitude, double latitude, String ref) {
         this.lon = longitude;
         this.lat = latitude;
         this.ref = ref;
+    }
+
+    public Node(double longitude, double latitude) {
+        this.lon = longitude;
+        this.lat = latitude;
     }
 
     public Node(Node node) {

@@ -22,37 +22,9 @@ public class RouteModel extends Model {
             this.index = idx;
         }
 
-        public Node findClosestNode(int idx, RouteModel parentModel, float lon, float lat, String ref) {
-            RMNode input = new RMNode(idx, parentModel, new Node(lon, lat, ref));
-
-            float minDist = Float.MAX_VALUE;
-            double dist;
-            int closestIdx = -1;
-
-            for ( Road road : getRoads().values()) {
-                if (road.getType() != Road.Type.Footway) {
-                    for (String nodeId : getWays().get(road.getRef()).getNodes()) {
-                        System.out.print(nodeId);
-                        int nodeIdx = parentModel.wayIdHashMap.get(nodeId);
-                        dist = input.manhattanDist( searchIdx(nodeIdx) );
-                        if (dist < minDist) {
-                            closestIdx = nodeIdx;
-                            minDist = (float) dist;
-                        }
-                    }
-                }
-            }
-            return getRouteModelNodes().get(closestIdx);
+        public RMNode (double lon, double lat){
+            super(lon, lat);
         }
-
-        public RMNode searchIdx (int index){
-            for(RMNode node: parentModel.getRouteModelNodes()){
-                if(node.getIndex() == index)
-                    return node;
-            }
-            return null;
-        }
-
 
         public void findNeighbors() {
             List<Road> roads = parentModel.getNodeToRoad().get(this.getRef());
@@ -83,6 +55,11 @@ public class RouteModel extends Model {
 
         double manhattanDist(RMNode node){
             return Math.abs(node.getLon() - getLon()) + Math.abs(node.getLat() - getLat());
+        }
+
+        @Override
+        public String toString() {
+            return getRef() +" (" + getLon() + ", " + getLat() + ")";
         }
     }
 
@@ -125,8 +102,6 @@ public class RouteModel extends Model {
                 }
             }
         }
-
-
         // Iterate over nodeToRoad "node_id: (type, wayNum, wayId) , ( ) ..."
 //        nodeToRoad.forEach((key, roadList) -> {
 //            // Print key
@@ -140,14 +115,36 @@ public class RouteModel extends Model {
 //        });
     }
 
-
-
-    public Node findClosestNode(float x, float y) {
-        // Implement your logic for finding the closest node here
+    public RMNode searchNode (String ref){
+        for(RMNode node: getRouteModelNodes()){
+            if(node.getRef().compareTo(ref) == 0)  {
+                return node;
+            }
+        }
         return null;
     }
 
-    //    public List<Node> getPath() {
-    //        return path;
-    //    }
+    public RMNode findClosestNode(float lon, float lat) {
+        RMNode input = new RMNode(lon, lat);
+
+        float minDist = Float.MAX_VALUE;
+        double dist;
+        int closestIdx = -1;
+
+        for ( Road road : getRoads().values()) {
+            if (road.getType() != Road.Type.Footway) {
+                for (String nodeId : getWays().get(road.getRef()).getNodes()) {
+                    RMNode temp = searchNode(nodeId);
+                    dist = input.manhattanDist(temp);
+                    if (dist < minDist) {
+                        closestIdx = temp.getIndex();
+                        minDist = (float) dist;
+                        System.out.println("Min Distance: " + minDist);
+                    }
+                }
+            }
+        }
+        return getRouteModelNodes().get(closestIdx);
+    }
+
 }
