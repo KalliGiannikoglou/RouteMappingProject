@@ -10,10 +10,10 @@ public class RoutePlanning {
 
     public RoutePlanning(RouteModel model, float startX, float startY, float endX, float endY) {
         // Convert inputs to percentage
-        startX *= 0.01f;
-        startY *= 0.01f;
-        endX *= 0.01f;
-        endY *= 0.01f;
+//        startX *= 0.01f;
+//        startY *= 0.01f;
+//        endX *= 0.01f;
+//        endY *= 0.01f;
 
         // Initialize the RMModel attribute
         this.rmModel = model;
@@ -25,26 +25,34 @@ public class RoutePlanning {
         this.endNode = rmModel.findClosestNode(endX, endY);
 
         System.out.println(startNode.getRef());
+        System.out.println(endNode.getRef());
+        addNeighbors(startNode);
     }
 
-//    public float getDistance() {
-//        // Getter for distance
-//        return distance;
-//    }
-//
+    //The H value of every node is their distance from the end node
+    public double calculateHValue(RouteModel.RMNode node) {
+        return node.manhattanDist(this.endNode);
+    }
+
+    public void addNeighbors(RouteModel.RMNode currentNode) {
+        currentNode.findNeighbors();
+        for (RouteModel.RMNode neighbor : currentNode.neighbors) {
+            neighbor.prev = currentNode;
+            neighbor.gVal = (float) (currentNode.gVal + neighbor.manhattanDist(currentNode));
+            neighbor.hVal = (float) calculateHValue(neighbor);
+            neighbor.visited = true;
+            this.openList.add(neighbor);
+        }
+
+        for (RouteModel.RMNode it : this.openList){
+            System.out.println(it.getRef());
+        }
+    }
 //    public void aStarSearch() {
 //        // A* search implementation
 //    }
-//
-//    public void addNeighbors(RouteModel.RMNode currentNode) {
-//        // Method to add neighbors
-//    }
-//
-//    public float calculateHValue(RouteModel.RMNode node) {
-//        // Method to calculate heuristic value
-//        return 0.0f;
-//    }
-//
+
+
 //    public List<RouteModel.RMNode> constructFinalPath(RouteModel.RMNode current) {
 //        // Method to construct final path
 //        return new ArrayList<>();
