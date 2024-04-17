@@ -38,6 +38,6 @@ public class Main {
 
         // Instantiate Model
         RouteModel model = new RouteModel(osmDataList);
-        RoutePlanning routePlanner = new RoutePlanning(model, (float) 22.9127992, (float) 39.355843, (float) 22.9074853, (float) 39.3597779);
+        RoutePlanning routePlanner = new RoutePlanning(model, (float) 22.9657393, (float) 39.3548485, (float) 22.9074853, (float) 39.3597779);
     }
 }

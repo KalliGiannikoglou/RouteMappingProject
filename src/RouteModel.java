@@ -5,7 +5,7 @@ public class RouteModel extends Model {
     public static class RMNode extends Node {
         protected int index;
         protected RouteModel parentModel;
-        protected Node prev;
+        protected RMNode prev;
         protected float hVal = Float.MAX_VALUE;
         protected float gVal = 0.0f;
         protected boolean visited = false;
@@ -24,14 +24,13 @@ public class RouteModel extends Model {
         }
 
         public void findNeighbors() {
-            List<Road> roads = parentModel.getNodeToRoad().get(this.getRef());
-            System.out.println("roads: " + roads);
+            // find all the Ways where the curr road belongs
+            List<Road> roads = parentModel.getRoadToWay().get(this.getRef());
             if (roads == null)
                 return;
 
             for (Road road : roads) {
                 List<String> nodes = parentModel.getWays().get(road.getRef()).nodes;
-                System.out.println("nodes: " + nodes);
                 RMNode newNeighbor = findNeighbor(nodes);
                 if (newNeighbor != null)
                     this.neighbors.add(newNeighbor);
@@ -66,8 +65,10 @@ public class RouteModel extends Model {
         }
     }
 
+    // routeModelNodes is a map with all the existing RMNodes, sorted by their node_id
     private final SortedMap<String, RMNode> routeModelNodes = new TreeMap<>();
-    private final Map<String, List<Road>> nodeToRoad = new HashMap<>();
+    // roadToNodes links a road id with all the ways it belongs
+    private final Map<String, List<Road>> roadToWay = new HashMap<>();
 
     public RouteModel(List<Byte> xml) {
         super(xml);
@@ -75,7 +76,7 @@ public class RouteModel extends Model {
         createHashmap();
     }
 
-    public Map<String, List<Road>> getNodeToRoad() { return nodeToRoad; }
+    public Map<String, List<Road>> getRoadToWay() { return roadToWay; }
 
     public SortedMap<String, RMNode> getRouteModelNodes(){ return routeModelNodes; }
 
@@ -96,11 +97,11 @@ public class RouteModel extends Model {
                 // Iterate over all nodes of the current road
                 for (String node_idx : getWays().get(road.getRef()).nodes) {
                     // If the node is not in the hashmap, create a new list for it
-                    if (!nodeToRoad.containsKey(node_idx)) {
-                        nodeToRoad.put(node_idx, new ArrayList<>());
+                    if (!roadToWay.containsKey(node_idx)) {
+                        roadToWay.put(node_idx, new ArrayList<>());
                     }
                     // Add the road to the list of roads for this node
-                    nodeToRoad.get(node_idx).add(road);
+                    roadToWay.get(node_idx).add(road);
                 }
             }
         }
