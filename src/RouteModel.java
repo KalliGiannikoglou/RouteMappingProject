@@ -61,14 +61,16 @@ public class RouteModel extends Model {
 
         @Override
         public String toString() {
-            return getRef() +" (" + getLon() + ", " + getLat() + ")";
+            return getRef() +" (" + getLat() + ", " + getLon() + ")";
         }
     }
 
+    protected List<RMNode> path = new ArrayList<>();
     // routeModelNodes is a map with all the existing RMNodes, sorted by their node_id
     private final SortedMap<String, RMNode> routeModelNodes = new TreeMap<>();
     // roadToNodes links a road id with all the ways it belongs
     private final Map<String, List<Road>> roadToWay = new HashMap<>();
+
 
     public RouteModel(List<Byte> xml) {
         super(xml);
@@ -77,7 +79,6 @@ public class RouteModel extends Model {
     }
 
     public Map<String, List<Road>> getRoadToWay() { return roadToWay; }
-
     public SortedMap<String, RMNode> getRouteModelNodes(){ return routeModelNodes; }
 
     private void createRouteModelNodes() {
@@ -105,17 +106,6 @@ public class RouteModel extends Model {
                 }
             }
         }
-        // Iterate over nodeToRoad "node_id: (type, wayNum, wayId) , ( ) ..."
-//        nodeToRoad.forEach((key, roadList) -> {
-//            // Print key
-//            System.out.print(key + ": ");
-//
-//            // Print list of roads using streams
-//            roadList.forEach(road -> System.out.print(road.toString() + ", "));
-//
-//            // Move to the next line for the next entry
-//            System.out.println();
-//        });
     }
 
     public RMNode searchNode (String ref){
@@ -149,5 +139,4 @@ public class RouteModel extends Model {
         }
         return getRouteModelNodes().get(closestId);
     }
-
 }

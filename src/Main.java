@@ -1,3 +1,5 @@
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -16,7 +18,7 @@ public class Main {
         }
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
 
         // File name here
         String osmDataFile = "volos.osm";
@@ -36,8 +38,13 @@ public class Main {
             osmDataList.add(b);
         }
 
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        System.out.print("Please give the coordinates (lat, lon): ");
+        String name = br.readLine();
+        System.out.println("Your coordinates are: " + name);
+
         // Instantiate Model
         RouteModel model = new RouteModel(osmDataList);
-        RoutePlanning routePlanner = new RoutePlanning(model, (float) 22.9657393, (float) 39.3548485, (float) 22.9074853, (float) 39.3597779);
+        RoutePlanning routePlanner = new RoutePlanning(model, (float) 22.94917304268554, (float)39.35886914943445, (float) 22.941792062711574, (float) 39.36313886399828);
     }
 }

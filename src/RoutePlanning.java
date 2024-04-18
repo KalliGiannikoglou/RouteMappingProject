@@ -1,5 +1,4 @@
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Collections;
 
@@ -19,16 +18,12 @@ public class RoutePlanning {
 
         // Initialize the RMModel attribute
         this.rmModel = model;
-        System.out.println("StartX: " + startX + ", Start Y: " + startY);
-
 
         // Use the mModel.findClosestNode method to find the closest nodes to the starting and ending coordinates
         this.startNode = rmModel.findClosestNode( startX, startY);
         this.endNode = rmModel.findClosestNode(endX, endY);
 
-        System.out.println(startNode.getRef());
-        System.out.println(endNode.getRef());
-        addNeighbors(startNode);
+        AStarSearch();
     }
 
     //The H value of every node is their distance from the end node
@@ -37,8 +32,9 @@ public class RoutePlanning {
     }
 
     public void addNeighbors(RouteModel.RMNode currentNode) {
+
         currentNode.findNeighbors();
-        System.out.println("Neighbours: " + currentNode.neighbors);
+
         for (RouteModel.RMNode neighbor : currentNode.neighbors) {
             neighbor.prev = currentNode;
             neighbor.gVal = (float) (currentNode.gVal + neighbor.manhattanDist(currentNode));
@@ -46,63 +42,53 @@ public class RoutePlanning {
             neighbor.visited = true;
             openList.add(neighbor);
         }
-
-        for (RouteModel.RMNode it : this.openList){
-            System.out.println(it.getRef());
-        }
-
-        //########### TESTING ##########################
-        nextNode();
     }
 
     public RouteModel.RMNode nextNode() {
         // Sort with a decreasing order
-        this.openList.sort(new Comparator<>() {
-            @Override
-            public int compare(RouteModel.RMNode v1, RouteModel.RMNode v2) {
-                return Float.compare(v2.hVal + v2.gVal, v1.hVal + v1.gVal);
-            }
-        });
+        this.openList.sort((v1, v2) -> Float.compare(v2.hVal + v2.gVal, v1.hVal + v1.gVal));
 
-        //########### TESTING ##########################
-        for(RouteModel.RMNode r :openList)
-            System.out.println("hVal: " + r.hVal + " ,gVal: " + r.gVal);
-        RouteModel.RMNode next_node = this.openList.remove(this.openList.size() - 1);
-        System.out.println(next_node);
-
-
-        //########### TESTING #########################
-        constructFinalPath(next_node);
-
-        return next_node;
+        return this.openList.remove(this.openList.size() - 1);
     }
 
     public List<RouteModel.RMNode> constructFinalPath(RouteModel.RMNode currNode) {
-        // Create path_found list
-        distance = 0.0f;
-        List<RouteModel.RMNode> path_found = new ArrayList<>();
 
-        path_found.add(currNode);
+        // dist of the found path
+        distance = 0.0f;
+        // Create pathFound list
+        List<RouteModel.RMNode> pathFound = new ArrayList<>();
+
+        pathFound.add(currNode);
         while (currNode.getLon() != this.startNode.getLon() &&
                 currNode.getLat() != this.startNode.getLat()) {
             distance += currNode.manhattanDist( currNode.prev);
-            path_found.add(currNode.prev);
+            pathFound.add(currNode.prev);
             currNode = currNode.prev;
         }
-        Collections.reverse(path_found);
+        Collections.reverse(pathFound);
 
         // Multiply the distance by the scale of the map to get meters
         distance *= rmModel.getMetricScale();
 
-        System.out.println("Path found: " + path_found);
+        System.out.println("Path found: " + pathFound);
         System.out.println("Distance calculated: " + distance);
-        return path_found;
+        return pathFound;
     }
 
-//    public void aStarSearch() {
-//        // A* search implementation
-//    }
+    public void AStarSearch() {
 
+        this.startNode.visited = true;
+        this.openList.add(this.startNode);
 
-
+        while (!this.openList.isEmpty()) {
+            RouteModel.RMNode next_node = nextNode();
+            if (next_node.getLon() == this.endNode.getLon() &&
+                    next_node.getLat() == this.endNode.getLat()) {
+                rmModel.path = constructFinalPath(next_node);
+                break;
+            } else {
+                addNeighbors(next_node);
+            }
+        }
+    }
 }

@@ -38,6 +38,6 @@ public class Node {
 
     @Override
     public String toString() {
-        return "(" + lon + ", " + lat + ")";
+        return "(" + lat + ", " + lon + ")";
     }
 }
