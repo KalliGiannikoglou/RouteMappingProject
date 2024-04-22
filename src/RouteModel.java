@@ -40,10 +40,27 @@ public class RouteModel extends Model {
             }
         }
 
+        public List<String> nextListElements(List<String> nodeRefs){
+            List<String> nextNodes = new ArrayList<>();
+            boolean found = false;
+
+            for(String ref: nodeRefs){
+                if(this.getRef().compareTo(ref) == 0){
+                    found = true;
+                }
+                if(found){
+                    nextNodes.add(ref);
+                }
+            }
+            return nextNodes;
+        }
+
         public RMNode findNeighbor(List<String> nodeRefs) {
             RMNode closestNode = null;
 
-            for (String ref : nodeRefs) {
+            List<String> nextNodes = nextListElements(nodeRefs);
+
+            for (String ref : nextNodes) {
                 RMNode node = parentModel.getRouteModelNodes().get(ref);
                 if (this.getRef().compareTo(ref) != 0 && !node.visited) {
                     if (closestNode == null || this.manhattanDist(node) < this.manhattanDist(closestNode)) {

@@ -39,12 +39,23 @@ public class Main {
         }
 
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        System.out.print("Please give the coordinates (lat, lon): ");
-        String name = br.readLine();
-        System.out.println("Your coordinates are: " + name);
+        System.out.print("Please give the start coordinates (lat, lon): ");
+        String start = br.readLine();
+        String[] parts = start.split(",");
+        float startLat = Float.parseFloat(parts[0]);
+        float startLon = Float.parseFloat(parts[1]);
+
+        System.out.print("Please give the end coordinates (lat, lon): ");
+        String end = br.readLine();
+        parts = end.split(",");
+        float endLat = Float.parseFloat(parts[0]);
+        float endLon = Float.parseFloat(parts[1]);
+
+        System.out.println("Start: " + startLat + ", " + startLon);
+        System.out.println("End: " + endLat + ", " + endLon);
 
         // Instantiate Model
         RouteModel model = new RouteModel(osmDataList);
-        RoutePlanning routePlanner = new RoutePlanning(model, (float) 22.94917304268554, (float)39.35886914943445, (float) 22.941792062711574, (float) 39.36313886399828);
+        RoutePlanning routePlanner = new RoutePlanning(model, startLon, startLat, endLon, endLat);
     }
 }
