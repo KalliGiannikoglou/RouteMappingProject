@@ -1,3 +1,4 @@
+import edu.princeton.cs.algs4.Point2D;
 import java.util.*;
 
 public class RouteModel extends Model {
@@ -32,11 +33,10 @@ public class RouteModel extends Model {
             for (Road road : roads) {
                 List<String> nodes = parentModel.getWays().get(road.getRef()).nodes;
                 RMNode newNeighbor = findNeighbor(nodes);
-                if (newNeighbor != null)
+                if (newNeighbor != null) {
                     this.neighbors.add(newNeighbor);
-            }
-            for(RouteModel.RMNode node : neighbors){
-                System.out.println("Neighbour: " + node.getRef());
+                }
+
             }
         }
 
@@ -45,11 +45,11 @@ public class RouteModel extends Model {
             boolean found = false;
 
             for(String ref: nodeRefs){
-                if(this.getRef().compareTo(ref) == 0){
-                    found = true;
-                }
                 if(found){
                     nextNodes.add(ref);
+                }
+                else if(this.getRef().compareTo(ref) == 0){
+                    found = true;
                 }
             }
             return nextNodes;
@@ -88,6 +88,8 @@ public class RouteModel extends Model {
     // roadToNodes links a road id with all the ways it belongs
     private final Map<String, List<Road>> roadToWay = new HashMap<>();
 
+    protected KDTree nodesTree = new KDTree();
+    private final SortedMap<Point2D, String> pointToRef = new TreeMap<>();
 
     public RouteModel(List<Byte> xml) {
         super(xml);
@@ -105,6 +107,9 @@ public class RouteModel extends Model {
             RMNode newRmNode = new RMNode(counter, this, node);
             routeModelNodes.put(newRmNode.getRef(), newRmNode);
             counter++;
+            Point2D point = new Point2D(entry.getValue().getLon(), entry.getValue().getLat());
+            nodesTree.insert(point);
+            pointToRef.put(point, node.getRef());
         }
     }
 
@@ -135,25 +140,11 @@ public class RouteModel extends Model {
     }
 
     public RMNode findClosestNode(float lon, float lat) {
-        RMNode input = new RMNode(lon, lat);
 
-        double minDist = Float.MAX_VALUE;
-        double dist;
-        String closestId = "";
-
-        for ( Road road : getRoads().values()) {
-            if (road.getType() != Road.Type.Footway) {
-                for (String nodeId : getWays().get(road.getRef()).getNodes()) {
-                    RMNode temp = searchNode(nodeId);
-                    dist = input.manhattanDist(temp);
-                    if (dist < minDist) {
-                        closestId = temp.getRef();
-                        minDist = dist;
-                        System.out.println("Min Distance: " + minDist + " closestId: " + closestId);
-                    }
-                }
-            }
-        }
-        return getRouteModelNodes().get(closestId);
+        Point2D closestPoint = nodesTree.nearest(new Point2D(lon, lat));
+        String ref = pointToRef.get(closestPoint);
+        System.out.println("Nearest: " + closestPoint + " and ref: " + ref);
+        RMNode node = routeModelNodes.get(ref);
+        return node;
     }
 }

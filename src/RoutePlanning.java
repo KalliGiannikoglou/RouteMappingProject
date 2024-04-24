@@ -1,3 +1,5 @@
+import edu.princeton.cs.algs4.Point2D;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Collections;
@@ -7,7 +9,7 @@ public class RoutePlanning {
     private final RouteModel.RMNode startNode;
     private final RouteModel.RMNode endNode;
     private float distance = 0.0f;
-    private final RouteModel rmModel;
+    protected final RouteModel rmModel;
 
     public RoutePlanning(RouteModel model, float startX, float startY, float endX, float endY) {
         // Convert inputs to percentage

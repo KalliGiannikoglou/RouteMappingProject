@@ -1,3 +1,5 @@
+import edu.princeton.cs.algs4.Point2D;
+
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
