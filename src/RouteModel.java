@@ -1,5 +1,8 @@
 import edu.princeton.cs.algs4.Point2D;
+
+import java.awt.*;
 import java.util.*;
+import java.util.List;
 
 public class RouteModel extends Model {
 
@@ -107,9 +110,6 @@ public class RouteModel extends Model {
             RMNode newRmNode = new RMNode(counter, this, node);
             routeModelNodes.put(newRmNode.getRef(), newRmNode);
             counter++;
-            Point2D point = new Point2D(entry.getValue().getLon(), entry.getValue().getLat());
-            nodesTree.insert(point);
-            pointToRef.put(point, node.getRef());
         }
     }
 
@@ -125,6 +125,10 @@ public class RouteModel extends Model {
                     }
                     // Add the road to the list of roads for this node
                     roadToWay.get(node_idx).add(road);
+                    RouteModel.RMNode roadNode = getRouteModelNodes().get(node_idx);
+                    Point2D point = new Point2D(roadNode.getLon(), roadNode.getLat());
+                    nodesTree.insert(point);
+                    pointToRef.put(point, roadNode.getRef());
                 }
             }
         }

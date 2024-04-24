@@ -1,5 +1,9 @@
 import edu.princeton.cs.algs4.Point2D;
 
+import java.awt.*;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Collections;
@@ -55,6 +59,7 @@ public class RoutePlanning {
 
     public List<RouteModel.RMNode> constructFinalPath(RouteModel.RMNode currNode) {
 
+        System.out.println("Final Path!");
         // dist of the found path
         distance = 0.0f;
         // Create pathFound list
