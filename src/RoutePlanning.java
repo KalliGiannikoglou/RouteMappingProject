@@ -1,9 +1,5 @@
 import edu.princeton.cs.algs4.Point2D;
 
-import java.awt.*;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Collections;
@@ -92,6 +88,8 @@ public class RoutePlanning {
             if (next_node.getLon() == this.endNode.getLon() &&
                     next_node.getLat() == this.endNode.getLat()) {
                 rmModel.path = constructFinalPath(next_node);
+                MapDisplay map = new MapDisplay();
+                map.googleMapsDisplay(rmModel.path);
                 break;
             } else {
                 addNeighbors(next_node);
