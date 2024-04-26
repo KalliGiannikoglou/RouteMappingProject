@@ -1,14 +1,11 @@
-import edu.princeton.cs.algs4.Point2D;
-
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Collections;
+import java.util.List;
 
 public class RoutePlanning {
     private final List<RouteModel.RMNode> openList = new ArrayList<>();
     private final RouteModel.RMNode startNode;
     private final RouteModel.RMNode endNode;
-    private float distance = 0.0f;
     protected final RouteModel rmModel;
 
     public RoutePlanning(RouteModel model, float startX, float startY, float endX, float endY) {
@@ -46,35 +43,27 @@ public class RoutePlanning {
         }
     }
 
-    public RouteModel.RMNode nextNode() {
+    public RouteModel.RMNode findNextNode() {
         // Sort with a decreasing order
         this.openList.sort((v1, v2) -> Float.compare(v2.hVal + v2.gVal, v1.hVal + v1.gVal));
-
         return this.openList.remove(this.openList.size() - 1);
     }
 
     public List<RouteModel.RMNode> constructFinalPath(RouteModel.RMNode currNode) {
 
-        System.out.println("Final Path!");
         // dist of the found path
-        distance = 0.0f;
         // Create pathFound list
         List<RouteModel.RMNode> pathFound = new ArrayList<>();
 
         pathFound.add(currNode);
-        while (currNode.getLon() != this.startNode.getLon() &&
-                currNode.getLat() != this.startNode.getLat()) {
-            distance += currNode.manhattanDist( currNode.prev);
+        while (currNode.getLon() != this.startNode.getLon() && currNode.getLat() != this.startNode.getLat()) {
             pathFound.add(currNode.prev);
             currNode = currNode.prev;
         }
         Collections.reverse(pathFound);
 
-        // Multiply the distance by the scale of the map to get meters
-        distance *= rmModel.getMetricScale();
 
-        System.out.println("Path found: " + pathFound);
-        System.out.println("Distance calculated: " + distance);
+
         return pathFound;
     }
 
@@ -82,17 +71,15 @@ public class RoutePlanning {
 
         this.startNode.visited = true;
         this.openList.add(this.startNode);
-
         while (!this.openList.isEmpty()) {
-            RouteModel.RMNode next_node = nextNode();
-            if (next_node.getLon() == this.endNode.getLon() &&
-                    next_node.getLat() == this.endNode.getLat()) {
-                rmModel.path = constructFinalPath(next_node);
+            RouteModel.RMNode nextNode = findNextNode();
+            if (nextNode.getLon() == this.endNode.getLon() && nextNode.getLat() == this.endNode.getLat()) {
+                rmModel.path = constructFinalPath(nextNode);
                 MapDisplay map = new MapDisplay();
                 map.googleMapsDisplay(rmModel.path);
                 break;
             } else {
-                addNeighbors(next_node);
+                addNeighbors(nextNode);
             }
         }
     }

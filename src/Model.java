@@ -158,6 +158,12 @@ public class Model {
                             String category = child.attr("k");
                             String type = child.attr("v");
 
+                            // Set Direction
+                            if(category.equals("oneway") && type.equals("yes")){
+                                newWay.setDirection(true);
+                            }
+
+                            //Set road type
                             if (category.equals("highway")) {
                                 Road.Type road_type = StringToHighwayType(type);
                                 if (road_type != Road.Type.Invalid) {
@@ -204,22 +210,6 @@ public class Model {
                     System.err.println("Out of memory error: " + e.getMessage());
                 }
             }
-
-//            // Iterating over Ways
-//            for (Map.Entry<String, Way> entry : ways.entrySet()) {
-//                System.out.println(entry.getValue());
-//            }
-//
-//            // Iterating over Roads
-//            for (Map.Entry<Integer, Road> entry : roads.entrySet()) {
-//                System.out.print(entry.getKey());
-//                System.out.println(entry.getValue());
-//            }
-//
-//            // Iterate over the map entries and print each key-value pair
-//            for (Map.Entry<String, Double> entry : wayIdHashMap.entrySet()) {
-//                System.out.println("Key: " + entry.getKey() + ", Value: " + entry.getValue());
-//            }
 
         } catch (Exception e) {
             e.printStackTrace();

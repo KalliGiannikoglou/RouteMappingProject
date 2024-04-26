@@ -1,8 +1,6 @@
 import edu.princeton.cs.algs4.Point2D;
 
-import java.awt.*;
 import java.util.*;
-import java.util.List;
 
 public class RouteModel extends Model {
 
@@ -34,8 +32,8 @@ public class RouteModel extends Model {
                 return;
 
             for (Road road : roads) {
-                List<String> nodes = parentModel.getWays().get(road.getRef()).nodes;
-                RMNode newNeighbor = findNeighbor(nodes);
+                Way way = parentModel.getWays().get(road.getRef());
+                RMNode newNeighbor = findNeighbor(way);
                 if (newNeighbor != null) {
                     this.neighbors.add(newNeighbor);
                 }
@@ -58,12 +56,16 @@ public class RouteModel extends Model {
             return nextNodes;
         }
 
-        public RMNode findNeighbor(List<String> nodeRefs) {
+        public RMNode findNeighbor(Way way) {
             RMNode closestNode = null;
 
-            List<String> nextNodes = nextListElements(nodeRefs);
+            List<String> nodeRefs = way.nodes;
 
-            for (String ref : nextNodes) {
+            if(way.isOneWay()){
+                nodeRefs = nextListElements(nodeRefs);
+            }
+
+            for (String ref : nodeRefs) {
                 RMNode node = parentModel.getRouteModelNodes().get(ref);
                 if (this.getRef().compareTo(ref) != 0 && !node.visited) {
                     if (closestNode == null || this.manhattanDist(node) < this.manhattanDist(closestNode)) {
@@ -75,7 +77,6 @@ public class RouteModel extends Model {
         }
 
         double manhattanDist(RMNode node){
-//            return Math.sqrt(Math.pow(node.getLon() - getLon(), 2) + Math.pow(node.getLat() - getLat(), 2));
             return Math.abs(node.getLon() - getLon()) + Math.abs(node.getLat() - getLat());
         }
 
@@ -88,6 +89,7 @@ public class RouteModel extends Model {
     protected List<RMNode> path = new ArrayList<>();
     // routeModelNodes is a map with all the existing RMNodes, sorted by their node_id
     private final SortedMap<String, RMNode> routeModelNodes = new TreeMap<>();
+
     // roadToNodes links a road id with all the ways it belongs
     private final Map<String, List<Road>> roadToWay = new HashMap<>();
 
@@ -148,7 +150,6 @@ public class RouteModel extends Model {
         Point2D closestPoint = nodesTree.nearest(new Point2D(lon, lat));
         String ref = pointToRef.get(closestPoint);
         System.out.println("Nearest: " + closestPoint + " and ref: " + ref);
-        RMNode node = routeModelNodes.get(ref);
-        return node;
+        return routeModelNodes.get(ref);
     }
 }

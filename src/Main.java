@@ -1,13 +1,11 @@
-import edu.princeton.cs.algs4.Point2D;
-
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 public class Main {
     public static Optional<byte[]> readFile(String filePath) {
@@ -52,9 +50,6 @@ public class Main {
         parts = end.split(",");
         float endLat = Float.parseFloat(parts[0]);
         float endLon = Float.parseFloat(parts[1]);
-
-        System.out.println("Start: " + startLat + ", " + startLon);
-        System.out.println("End: " + endLat + ", " + endLon);
 
         // Instantiate Model
         RouteModel model = new RouteModel(osmDataList);
