@@ -11,7 +11,12 @@ public class RouteModel extends Model {
         protected float hVal = Float.MAX_VALUE;
         protected float gVal = 0.0f;
         protected boolean visited = false;
+        public boolean isEndNode = false;
         protected List<RMNode> neighbors = new ArrayList<>();
+
+        // tour planning
+        protected boolean checked = false;
+        protected List<Float> distances = new ArrayList<>();
 
         public int getIndex() { return index; }
 

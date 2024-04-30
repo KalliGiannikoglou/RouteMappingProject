@@ -6,6 +6,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import edu.princeton.cs.algs4.Point2D;
 
 public class Main {
     public static Optional<byte[]> readFile(String filePath) {
@@ -39,20 +40,26 @@ public class Main {
         }
 
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        System.out.print("Please give the start coordinates (lat, lon): ");
+        System.out.print("Please give the source coordinates (lat, lon): ");
         String start = br.readLine();
         String[] parts = start.split(",");
         float startLat = Float.parseFloat(parts[0]);
         float startLon = Float.parseFloat(parts[1]);
 
-        System.out.print("Please give the end coordinates (lat, lon): ");
+        System.out.println("Please give the destination coordinates (lat, lon). Press q to stop.");
+        List<Point2D> destinations = new ArrayList<>();
         String end = br.readLine();
-        parts = end.split(",");
-        float endLat = Float.parseFloat(parts[0]);
-        float endLon = Float.parseFloat(parts[1]);
+        while (end.compareTo("q") != 0){
+            parts = end.split(",");
+            float endLat = Float.parseFloat(parts[0]);
+            float endLon = Float.parseFloat(parts[1]);
+            destinations.add(new Point2D(endLon, endLat));
+            end = br.readLine();
+        }
+
 
         // Instantiate Model
         RouteModel model = new RouteModel(osmDataList);
-        RoutePlanning routePlanner = new RoutePlanning(model, startLon, startLat, endLon, endLat);
+        RoutePlanning routePlanner = new RoutePlanning(model, new Point2D(startLon, startLat) , destinations);
     }
 }
