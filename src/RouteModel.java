@@ -63,19 +63,17 @@ public class RouteModel extends Model {
 
         public RMNode findNeighbor(Way way) {
             RMNode closestNode = null;
-
             List<String> nodeRefs = way.nodes;
 
-            if(way.isOneWay()){
+            // If the road is one_way check only the nodes after curr
+            if(way.isOneWay())
                 nodeRefs = nextListElements(nodeRefs);
-            }
 
             for (String ref : nodeRefs) {
                 RMNode node = parentModel.getRouteModelNodes().get(ref);
                 if (this.getRef().compareTo(ref) != 0 && !node.visited) {
-                    if (closestNode == null || this.manhattanDist(node) < this.manhattanDist(closestNode)) {
+                    if (closestNode == null || this.manhattanDist(node) < this.manhattanDist(closestNode))
                         closestNode = parentModel.getRouteModelNodes().get(ref);
-                    }
                 }
             }
             return closestNode;

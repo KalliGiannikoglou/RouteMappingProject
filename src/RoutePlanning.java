@@ -7,8 +7,7 @@ import java.util.List;
 public class RoutePlanning {
     private final List<RouteModel.RMNode> openList = new ArrayList<>();
     private final RouteModel.RMNode startNode;
-    //private final RouteModel.RMNode endNode;
-    private final List<RouteModel.RMNode> endNodes = new ArrayList<>();
+    private final List<RouteModel.RMNode> destPoints = new ArrayList<>();
     protected final RouteModel rmModel;
 
     public RoutePlanning(RouteModel model, Point2D start, List<Point2D> end) {
@@ -19,17 +18,17 @@ public class RoutePlanning {
         // ################ not optimal at the moment, will change in phase 3 ################
         this.startNode = rmModel.findClosestNode( (float) start.x(), (float) start.y());
         for(Point2D node : end)
-            this.endNodes.add(rmModel.findClosestNode((float) node.x(), (float) node.y()));
+            this.destPoints.add(rmModel.findClosestNode((float) node.x(), (float) node.y()));
 
         // Create a list with start node first and all the destination nodes after
         List<RouteModel.RMNode> allNodes = new ArrayList<>();
         allNodes.add(this.startNode);
-        allNodes.addAll(this.endNodes);
+        allNodes.addAll(this.destPoints);
 
-        for(RouteModel.RMNode currNode: allNodes){
+        for(RouteModel.RMNode currNode: allNodes) {
             currNode.isEndNode = true;
             // Find all the distances with one specific node
-            for(RouteModel.RMNode other: allNodes){
+            for (RouteModel.RMNode other : allNodes) {
                 currNode.distances.add((float) currNode.manhattanDist(other));
             }
         }
@@ -37,17 +36,22 @@ public class RoutePlanning {
         // find optimal tour
         List<RouteModel.RMNode> tour = findTraversalOrder(allNodes);
 
-        System.out.println("Opt Tour: " + tour);
+        for(int i = 0; i < tour.size() - 1 ; i++){
+            // Clear the list before starting a new iteration
+            this.openList.clear();
+            // make null first node's prev to mark separate tours
+            tour.get(i).prev = null;
 
-        for(int i=0; i < tour.size()-1; i++){
             AStarSearch(tour.get(i), tour.get(i+1));
         }
+        MapDisplay map = new MapDisplay();
+        map.googleMapsDisplay(rmModel.path);
 
     }
 
     // Heuristic approach on TSP. Find a nearly optimal traversal of all the destination points provided.
     //The TSP is equivalent to finding a minimum-weight perfect matching in a complete graph
-    // where the weight of an edge is the distance between two cities.
+    // where the weight of an edge is the distance between two destination points.
     public List<RouteModel.RMNode> findTraversalOrder(List<RouteModel.RMNode> nodes){
 
         // Empty list to store the final optimal tour
@@ -108,12 +112,11 @@ public class RoutePlanning {
 
     public List<RouteModel.RMNode> constructFinalPath(RouteModel.RMNode currNode) {
 
-        // dist of the found path
         // Create pathFound list
         List<RouteModel.RMNode> pathFound = new ArrayList<>();
 
         pathFound.add(currNode);
-        while (currNode.getLon() != this.startNode.getLon() && currNode.getLat() != this.startNode.getLat()) {
+        while (currNode.prev != null) {
             pathFound.add(currNode.prev);
             currNode = currNode.prev;
         }
@@ -124,20 +127,23 @@ public class RoutePlanning {
 
     public void AStarSearch(RouteModel.RMNode startNode, RouteModel.RMNode endNode) {
 
-        System.out.println("Start: " + startNode + ", end: " + endNode);
+        System.out.println("Start: " + startNode + ", End: " + endNode);
         this.startNode.visited = true;
         this.openList.add(startNode);
         while (!this.openList.isEmpty()) {
+
             RouteModel.RMNode nextNode = findNextNode();
             if (nextNode.getLon() == endNode.getLon() && nextNode.getLat() == endNode.getLat()) {
+
                 List<RouteModel.RMNode> shortPath = constructFinalPath(nextNode);
                 rmModel.path.addAll(shortPath);
+                System.out.println("Short path: " + shortPath);
                 break;
             } else {
                 addNeighbors(nextNode, endNode);
             }
         }
-        MapDisplay map = new MapDisplay();
-        map.googleMapsDisplay(rmModel.path);
+
+        System.out.println("Final pAth: " + rmModel.path);
     }
 }

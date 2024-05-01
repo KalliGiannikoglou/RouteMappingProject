@@ -40,13 +40,12 @@ public class Main {
         }
 
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        System.out.print("Please give the source coordinates (lat, lon): ");
+        System.out.println("Please give the source and destination coordinates (lat, lon). Press q to stop.");
         String start = br.readLine();
         String[] parts = start.split(",");
         float startLat = Float.parseFloat(parts[0]);
         float startLon = Float.parseFloat(parts[1]);
 
-        System.out.println("Please give the destination coordinates (lat, lon). Press q to stop.");
         List<Point2D> destinations = new ArrayList<>();
         String end = br.readLine();
         while (end.compareTo("q") != 0){
@@ -56,7 +55,6 @@ public class Main {
             destinations.add(new Point2D(endLon, endLat));
             end = br.readLine();
         }
-
 
         // Instantiate Model
         RouteModel model = new RouteModel(osmDataList);
