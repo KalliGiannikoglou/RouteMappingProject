@@ -1,14 +1,13 @@
 import edu.princeton.cs.algs4.Point2D;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class RoutePlanning {
     private final List<RouteModel.RMNode> openList = new ArrayList<>();
     private final RouteModel.RMNode startNode;
     private final List<RouteModel.RMNode> destPoints = new ArrayList<>();
     protected final RouteModel rmModel;
+    protected final SortedMap<String, Boolean> visitedNodes = new TreeMap<>();
 
     public RoutePlanning(RouteModel model, Point2D start, List<Point2D> end) {
 
@@ -42,7 +41,7 @@ public class RoutePlanning {
             // make null first node's prev to mark separate tours
             tour.get(i).prev = null;
 
-            AStarSearch(tour.get(i), tour.get(i+1));
+            AStarSearch(tour.get(i).getRef(), tour.get(i+1).getRef());
         }
         MapDisplay map = new MapDisplay();
         map.googleMapsDisplay(rmModel.path);
@@ -91,16 +90,19 @@ public class RoutePlanning {
         return currNode.manhattanDist(endNode);
     }
 
-    public void addNeighbors(RouteModel.RMNode currentNode, RouteModel.RMNode endNode) {
+    public void addNeighbors(RouteModel.RMNode currentNode, RouteModel.RMNode endNode,
+                             SortedMap<String, RouteModel.RMNode> allNodes) {
 
-        currentNode.findNeighbors();
+        currentNode.findNeighbors(allNodes, visitedNodes);
 
         for (RouteModel.RMNode neighbor : currentNode.neighbors) {
-            neighbor.prev = currentNode;
-            neighbor.gVal = (float) (currentNode.gVal + neighbor.manhattanDist(currentNode));
-            neighbor.hVal = (float) calculateHValue(neighbor, endNode);
-            neighbor.visited = true;
-            openList.add(neighbor);
+            if(visitedNodes.get(neighbor.getRef()) == null) {
+                neighbor.prev = currentNode;
+                neighbor.gVal = (float) (currentNode.gVal + neighbor.manhattanDist(currentNode));
+                neighbor.hVal = (float) calculateHValue(neighbor, endNode);
+                visitedNodes.put(neighbor.getRef(), true);
+                openList.add(neighbor);
+            }
         }
     }
 
@@ -115,8 +117,13 @@ public class RoutePlanning {
         // Create pathFound list
         List<RouteModel.RMNode> pathFound = new ArrayList<>();
 
+        RouteModel.RMNode tail = null;
+        if(rmModel.path.size() != 0)
+            // get the last element of the path
+            tail = this.rmModel.path.get(rmModel.path.size() - 1);
+
         pathFound.add(currNode);
-        while (currNode.prev != null) {
+        while (currNode.prev != tail) {
             pathFound.add(currNode.prev);
             currNode = currNode.prev;
         }
@@ -125,25 +132,29 @@ public class RoutePlanning {
         return pathFound;
     }
 
-    public void AStarSearch(RouteModel.RMNode startNode, RouteModel.RMNode endNode) {
+    public void AStarSearch(String startNodeRef, String endNodeRef) {
 
-        System.out.println("Start: " + startNode + ", End: " + endNode);
-        this.startNode.visited = true;
+        System.out.println("Start: " + startNodeRef + ", End: " + endNodeRef);
+        SortedMap<String, RouteModel.RMNode> allNodesLocal = new TreeMap<>(rmModel.getRouteModelNodes());
+        RouteModel.RMNode startNode = allNodesLocal.get(startNodeRef);
+        RouteModel.RMNode endNode = allNodesLocal.get(endNodeRef);
+
+        // Clear the visiting list from the prev iteration
+        visitedNodes.clear();
+        visitedNodes.put(startNodeRef, true);
+
         this.openList.add(startNode);
         while (!this.openList.isEmpty()) {
-
             RouteModel.RMNode nextNode = findNextNode();
-            if (nextNode.getLon() == endNode.getLon() && nextNode.getLat() == endNode.getLat()) {
 
+            if (nextNode.getLon() == endNode.getLon() && nextNode.getLat() == endNode.getLat()) {
                 List<RouteModel.RMNode> shortPath = constructFinalPath(nextNode);
                 rmModel.path.addAll(shortPath);
-                System.out.println("Short path: " + shortPath);
                 break;
-            } else {
-                addNeighbors(nextNode, endNode);
-            }
-        }
 
+            } else
+                addNeighbors(nextNode, endNode, allNodesLocal);
+        }
         System.out.println("Final pAth: " + rmModel.path);
     }
 }

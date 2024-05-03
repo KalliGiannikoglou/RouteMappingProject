@@ -10,7 +10,7 @@ public class RouteModel extends Model {
         protected RMNode prev;
         protected float hVal = Float.MAX_VALUE;
         protected float gVal = 0.0f;
-        protected boolean visited = false;
+        //protected boolean visited = false;
         public boolean isEndNode = false;
         protected List<RMNode> neighbors = new ArrayList<>();
 
@@ -30,7 +30,7 @@ public class RouteModel extends Model {
             super(lon, lat);
         }
 
-        public void findNeighbors() {
+        public void findNeighbors( SortedMap<String, RMNode> allNodes, SortedMap<String, Boolean> visitedNodes) {
             // find all the Ways where the curr road belongs
             List<Road> roads = parentModel.getRoadToWay().get(this.getRef());
             if (roads == null)
@@ -38,7 +38,7 @@ public class RouteModel extends Model {
 
             for (Road road : roads) {
                 Way way = parentModel.getWays().get(road.getRef());
-                RMNode newNeighbor = findNeighbor(way);
+                RMNode newNeighbor = findNeighbor(way, allNodes, visitedNodes);
                 if (newNeighbor != null) {
                     this.neighbors.add(newNeighbor);
                 }
@@ -61,7 +61,8 @@ public class RouteModel extends Model {
             return nextNodes;
         }
 
-        public RMNode findNeighbor(Way way) {
+        public RMNode findNeighbor(Way way, SortedMap<String, RMNode> allNodes,
+                                   SortedMap<String, Boolean> visitedNodes) {
             RMNode closestNode = null;
             List<String> nodeRefs = way.nodes;
 
@@ -70,10 +71,10 @@ public class RouteModel extends Model {
                 nodeRefs = nextListElements(nodeRefs);
 
             for (String ref : nodeRefs) {
-                RMNode node = parentModel.getRouteModelNodes().get(ref);
-                if (this.getRef().compareTo(ref) != 0 && !node.visited) {
+                RMNode node = allNodes.get(ref);
+                if (this.getRef().compareTo(ref) != 0 && visitedNodes.get(node.getRef()) == null) {
                     if (closestNode == null || this.manhattanDist(node) < this.manhattanDist(closestNode))
-                        closestNode = parentModel.getRouteModelNodes().get(ref);
+                        closestNode = allNodes.get(ref);
                 }
             }
             return closestNode;
@@ -91,7 +92,7 @@ public class RouteModel extends Model {
 
     protected List<RMNode> path = new ArrayList<>();
     // routeModelNodes is a map with all the existing RMNodes, sorted by their node_id
-    private final SortedMap<String, RMNode> routeModelNodes = new TreeMap<>();
+    private SortedMap<String, RMNode> routeModelNodes = new TreeMap<>();
 
     // roadToNodes links a road id with all the ways it belongs
     private final Map<String, List<Road>> roadToWay = new HashMap<>();
