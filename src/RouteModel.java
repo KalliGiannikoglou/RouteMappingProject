@@ -10,8 +10,9 @@ public class RouteModel extends Model {
         protected RMNode prev;
         protected float hVal = Float.MAX_VALUE;
         protected float gVal = 0.0f;
-        //protected boolean visited = false;
+        protected boolean visited = false;
         public boolean isEndNode = false;
+        public boolean isStartNode = false;
         protected List<RMNode> neighbors = new ArrayList<>();
 
         // tour planning
@@ -25,6 +26,7 @@ public class RouteModel extends Model {
             this.parentModel = parentModel;
             this.index = idx;
         }
+
 
         public RMNode(double lon, double lat){
             super(lon, lat);
@@ -92,7 +94,7 @@ public class RouteModel extends Model {
 
     protected List<RMNode> path = new ArrayList<>();
     // routeModelNodes is a map with all the existing RMNodes, sorted by their node_id
-    private SortedMap<String, RMNode> routeModelNodes = new TreeMap<>();
+    private final SortedMap<String, RMNode> routeModelNodes = new TreeMap<>();
 
     // roadToNodes links a road id with all the ways it belongs
     private final Map<String, List<Road>> roadToWay = new HashMap<>();

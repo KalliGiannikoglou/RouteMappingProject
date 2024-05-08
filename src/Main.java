@@ -40,24 +40,30 @@ public class Main {
         }
 
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        System.out.println("Please give the source and destination coordinates (lat, lon). Press q to stop.");
-        String start = br.readLine();
-        String[] parts = start.split(",");
-        float startLat = Float.parseFloat(parts[0]);
-        float startLon = Float.parseFloat(parts[1]);
+        System.out.println("Please give the source and destination coordinates (lat, lon) in pairs. Press q to stop.");
 
+        List<Point2D> sources = new ArrayList<>();
         List<Point2D> destinations = new ArrayList<>();
-        String end = br.readLine();
-        while (end.compareTo("q") != 0){
-            parts = end.split(",");
+        String line = br.readLine();
+        String[] parts;
+        while (line.compareTo("q") != 0){
+            // ##### SOURCE ####
+            parts = line.split(",");
+            float startLat = Float.parseFloat(parts[0]);
+            float startLon = Float.parseFloat(parts[1]);
+            sources.add(new Point2D(startLon, startLat));
+            line = br.readLine();
+
+            // ##### DESTINATION ####
+            parts = line.split(",");
             float endLat = Float.parseFloat(parts[0]);
             float endLon = Float.parseFloat(parts[1]);
             destinations.add(new Point2D(endLon, endLat));
-            end = br.readLine();
+            line = br.readLine();
         }
 
         // Instantiate Model
         RouteModel model = new RouteModel(osmDataList);
-        RoutePlanning routePlanner = new RoutePlanning(model, new Point2D(startLon, startLat) , destinations);
+        RoutePlanning routePlanner = new RoutePlanning(model, sources, destinations);
     }
 }

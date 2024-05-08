@@ -4,85 +4,137 @@ import java.util.*;
 
 public class RoutePlanning {
     private final List<RouteModel.RMNode> openList = new ArrayList<>();
-    private final RouteModel.RMNode startNode;
-    private final List<RouteModel.RMNode> destPoints = new ArrayList<>();
+    private final List<RouteModel.RMNode> startPoints = new ArrayList<>();
+    private final SortedMap<String, List<RouteModel.RMNode>> destPoints = new TreeMap<>();
     protected final RouteModel rmModel;
     protected final SortedMap<String, Boolean> visitedNodes = new TreeMap<>();
+    protected boolean checkedAll = false;
 
-    public RoutePlanning(RouteModel model, Point2D start, List<Point2D> end) {
+    // Store the final optimal tour
+    List<RouteModel.RMNode> optTour = new ArrayList<>();
+
+    public RoutePlanning(RouteModel model,  List<Point2D> start, List<Point2D> end) {
 
         // Initialize the RMModel attribute
         this.rmModel = model;
 
-        // ################ not optimal at the moment, will change in phase 3 ################
-        this.startNode = rmModel.findClosestNode( (float) start.x(), (float) start.y());
-        for(Point2D node : end)
-            this.destPoints.add(rmModel.findClosestNode((float) node.x(), (float) node.y()));
+        if(start.size() != end.size()){
+            System.out.println("Start and End points are not equal!");
+            return;
+        }
 
-        // Create a list with start node first and all the destination nodes after
-        List<RouteModel.RMNode> allNodes = new ArrayList<>();
-        allNodes.add(this.startNode);
-        allNodes.addAll(this.destPoints);
+        for(int i = 0; i < start.size(); i++) {
+            //  ##### START NODES ####
+            this.startPoints.add(rmModel.findClosestNode((float) start.get(i).x(), (float) start.get(i).y()));
+            this.startPoints.get(i).isStartNode = true;
+            String currStartRef = this.startPoints.get(i).getRef();
 
-        for(RouteModel.RMNode currNode: allNodes) {
-            currNode.isEndNode = true;
-            // Find all the distances with one specific node
-            for (RouteModel.RMNode other : allNodes) {
-                currNode.distances.add((float) currNode.manhattanDist(other));
+            // ##### END NODES ####
+            // end nodes are defined by their start pair, we have a lists with all the desination points that have the same source
+            RouteModel.RMNode newNode = rmModel.findClosestNode((float) end.get(i).x(), (float) end.get(i).y());
+            newNode.isEndNode = true;
+            if(this.destPoints.containsKey(currStartRef)){
+                this.destPoints.get(currStartRef).add(newNode);
+            }
+            else{
+                List<RouteModel.RMNode> newDestList = new ArrayList<>();
+                newDestList.add(newNode);
+                destPoints.put(currStartRef, newDestList);
             }
         }
 
-        // find optimal tour
-        List<RouteModel.RMNode> tour = findTraversalOrder(allNodes);
 
-        for(int i = 0; i < tour.size() - 1 ; i++){
+        // Create a list with start node first and all the destination nodes after
+        List<RouteModel.RMNode> allNodes = new ArrayList<>();
+
+        // add all source points
+        for(RouteModel.RMNode node: this.startPoints) {
+            allNodes = addNode(allNodes, node);
+        }
+
+        // find optimal tour
+        while( !checkedAll){
+            allNodes = findTraversalOrder(allNodes);
+        }
+        System.out.println("Opt tour: " + optTour);
+
+        // If source and destination are the same point
+        if(optTour.size() == 1){
+            AStarSearch(optTour.get(0).getRef(), optTour.get(0).getRef());
+        }
+
+        for(int i = 0; i < optTour.size() - 1 ; i++){
             // Clear the list before starting a new iteration
             this.openList.clear();
             // make null first node's prev to mark separate tours
-            tour.get(i).prev = null;
+            optTour.get(i).prev = null;
 
-            AStarSearch(tour.get(i).getRef(), tour.get(i+1).getRef());
+            AStarSearch(optTour.get(i).getRef(), optTour.get(i+1).getRef());
         }
         MapDisplay map = new MapDisplay();
         map.googleMapsDisplay(rmModel.path);
 
     }
 
+    public List<RouteModel.RMNode> addNode (List<RouteModel.RMNode> list, RouteModel.RMNode node){
+
+        if(!list.contains(node))
+            list.add(node);
+
+        return list;
+    }
+
     // Heuristic approach on TSP. Find a nearly optimal traversal of all the destination points provided.
     //The TSP is equivalent to finding a minimum-weight perfect matching in a complete graph
     // where the weight of an edge is the distance between two destination points.
     public List<RouteModel.RMNode> findTraversalOrder(List<RouteModel.RMNode> nodes){
-
-        // Empty list to store the final optimal tour
-        List<RouteModel.RMNode> optTour = new ArrayList<>();
-        // Duplicate of the initial list to keep track of the available destinations
-        List<RouteModel.RMNode> toVisit = new ArrayList<>(nodes);
-
+        Float minDist = Float.MAX_VALUE;
         RouteModel.RMNode minNode = null;
-        RouteModel.RMNode curr  = toVisit.get(0);
-        curr.checked = true;
+        RouteModel.RMNode curr;
 
-        while( !toVisit.isEmpty()){
-            Float minDist = Float.MAX_VALUE;
-            for(Float temp: curr.distances){
-                // Find min of curr nodes distances
-                if(temp < minDist){
-                    int index = curr.distances.indexOf(temp);
-                    //Check if it is already added in the list
-                    if( !nodes.get(index).checked){
-                        minNode = nodes.get(index);
-                        minDist = temp;
-                    }
-                }
-            }
-            // Add the node with min distance in the tour and check their distances with the remaining nodes
+        if( optTour.isEmpty()) {
+            curr = nodes.get(0);
             optTour.add(curr);
-            toVisit.remove(curr);
-            curr = minNode;
-            minNode.checked = true;
+        }
+        else
+            // get the last element added
+            curr= optTour.get(optTour.size() - 1);
+
+        curr.distances.clear();
+        if(curr.isStartNode){
+            for(RouteModel.RMNode node: destPoints.get(curr.getRef())) {
+                addNode(nodes, node);
+            }
+        }
+        nodes.remove(curr);
+
+
+        if(nodes.isEmpty()){
+            checkedAll = true;
+            return null;
         }
 
-        return optTour;
+        // Calculate curr node distances with all the remaining in the list
+        for (RouteModel.RMNode other : nodes) {
+            curr.distances.add((float) curr.manhattanDist(other));
+        }
+        System.out.println("Distances: " + curr.distances);
+        System.out.println("Available nodes: " + nodes);
+
+        for(Float temp: curr.distances){
+            // Find min of curr nodes distances
+            if(temp < minDist){
+                int index = curr.distances.indexOf(temp);
+                minNode = nodes.get(index);
+                minDist = temp;
+            }
+        }
+        // Add the node with min distance in the tour and check their distances with the remaining nodes\
+        if(minNode != null) {
+            optTour.add(minNode);
+            nodes.remove(minNode);
+        }
+        return nodes;
     }
 
     //The H value of every node is their distance from the end node
@@ -155,6 +207,5 @@ public class RoutePlanning {
             } else
                 addNeighbors(nextNode, endNode, allNodesLocal);
         }
-        System.out.println("Final pAth: " + rmModel.path);
     }
 }
