@@ -71,7 +71,8 @@ public class RoutePlanning {
 
             AStarSearch(optTour.get(i).getRef(), optTour.get(i+1).getRef());
         }
-        MapDisplay map = new MapDisplay();
+        System.out.println("Final PAth: " + rmModel.path);
+        MapDisplay map = new MapDisplay(rmModel);
         map.googleMapsDisplay(rmModel.path);
 
     }
@@ -101,10 +102,11 @@ public class RoutePlanning {
             curr= optTour.get(optTour.size() - 1);
 
         curr.distances.clear();
-        if(curr.isStartNode){
+        if(curr.isStartNode && !curr.visited){
             for(RouteModel.RMNode node: destPoints.get(curr.getRef())) {
                 addNode(nodes, node);
             }
+            curr.visited = true;
         }
         nodes.remove(curr);
 
@@ -164,19 +166,23 @@ public class RoutePlanning {
         return this.openList.remove(this.openList.size() - 1);
     }
 
-    public List<RouteModel.RMNode> constructFinalPath(RouteModel.RMNode currNode) {
+    public List<String> constructFinalPath(RouteModel.RMNode currNode) {
 
         // Create pathFound list
-        List<RouteModel.RMNode> pathFound = new ArrayList<>();
+        List<String> pathFound = new ArrayList<>();
 
+        String tailStr;
         RouteModel.RMNode tail = null;
-        if(rmModel.path.size() != 0)
-            // get the last element of the path
-            tail = this.rmModel.path.get(rmModel.path.size() - 1);
 
-        pathFound.add(currNode);
+        if (rmModel.path.size() != 0) {
+            // get the last element of the path
+            tailStr = this.rmModel.path.get(rmModel.path.size() - 1);
+            tail = rmModel.getRMNode(tailStr);
+        }
+
+        pathFound.add(currNode.getRef());
         while (currNode.prev != tail) {
-            pathFound.add(currNode.prev);
+            pathFound.add(currNode.prev.getRef());
             currNode = currNode.prev;
         }
         Collections.reverse(pathFound);
@@ -200,7 +206,7 @@ public class RoutePlanning {
             RouteModel.RMNode nextNode = findNextNode();
 
             if (nextNode.getLon() == endNode.getLon() && nextNode.getLat() == endNode.getLat()) {
-                List<RouteModel.RMNode> shortPath = constructFinalPath(nextNode);
+                List<String> shortPath = constructFinalPath(nextNode);
                 rmModel.path.addAll(shortPath);
                 break;
 

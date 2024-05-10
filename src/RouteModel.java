@@ -11,6 +11,7 @@ public class RouteModel extends Model {
         protected float hVal = Float.MAX_VALUE;
         protected float gVal = 0.0f;
         protected boolean visited = false;
+        protected boolean addedToMap = false;
         public boolean isEndNode = false;
         public boolean isStartNode = false;
         protected List<RMNode> neighbors = new ArrayList<>();
@@ -92,7 +93,7 @@ public class RouteModel extends Model {
         }
     }
 
-    protected List<RMNode> path = new ArrayList<>();
+    protected List<String> path = new ArrayList<>();
     // routeModelNodes is a map with all the existing RMNodes, sorted by their node_id
     private final SortedMap<String, RMNode> routeModelNodes = new TreeMap<>();
 
@@ -142,13 +143,10 @@ public class RouteModel extends Model {
         }
     }
 
-    public RMNode searchNode (String ref){
-        for(RMNode node: getRouteModelNodes().values()){
-            if(node.getRef().compareTo(ref) == 0)  {
-                return node;
-            }
-        }
-        return null;
+    public RMNode getRMNode (String ref){
+
+        RMNode node = getRouteModelNodes().get(ref);
+        return node;
     }
 
     public RMNode findClosestNode(float lon, float lat) {

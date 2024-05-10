@@ -6,6 +6,7 @@ import java.net.URL;
 import java.util.List;
 
 public class MapDisplay {
+    protected final RouteModel rmModel;
 
     // Google Static Maps API URL (Define window size)
     String apiUrl = "https://maps.googleapis.com/maps/api/staticmap?size=750x750&";
@@ -13,37 +14,46 @@ public class MapDisplay {
     String apiKey = "";
 
     // Default Constructor
-    public MapDisplay() { }
+    public MapDisplay(RouteModel model) {
+        this.rmModel = model;
+    }
 
-    public void googleMapsDisplay(List<RouteModel.RMNode> coordinates){
+    public void googleMapsDisplay(List<String> coordinates) {
 
         StringBuilder markers = new StringBuilder();
-        System.out.println("Number of nodes: " + coordinates.size());
+        StringBuilder path = new StringBuilder();
+        Character k = 'A';
         for (int i = 0; i < coordinates.size(); i++) {
-            RouteModel.RMNode coord = coordinates.get(i);
+            String coordNode = coordinates.get(i);
+            RouteModel.RMNode coord = rmModel.getRMNode(coordNode);
             // Form the coord string in Google Format
             String coordStr = coord.getLat() + "," + coord.getLon();
 
             // If we have more than 100 points, print on every 10
-            if(coordinates.size() >= 100 && i % 10 == 0)
-                markers.append("&markers=color:blue%7C").append(coordStr);
-            else if(i == coordinates.size() - 1)
-                markers.append("&markers=color:red%7C").append(coordStr);
-            else if(i == 0)
-                markers.append("&markers=color:green%7C").append(coordStr);
+            if (coord.isStartNode && coord.isEndNode) {
+                if( !coord.addedToMap){
+                    markers.append("&markers=color:black%7Clabel:").append(k).append("%7C").append(coordStr);
+                    k++;
+                    coord.addedToMap = true;
+                }
+            }
+            else if (coord.isStartNode) {
+                markers.append("&markers=color:green%7Clabel:").append(k).append("%7C").append(coordStr);
+                k++;
+            }
+            else if (coord.isEndNode) {
+                markers.append("&markers=color:red%7Clabel:").append(k).append("%7C").append(coordStr);
+                k++;
+            }
 
-        }
-
-        StringBuilder path = new StringBuilder();
-        // Mark the routing with blue
-        path.append("&path=color:blue|weight:5");
-
-        //separate coords with "|"
-        for (RouteModel.RMNode coord : coordinates) {
-            String coordStr = coord.getLat() + "," + coord.getLon();
+            // Mark the routing with blue
             path.append("|").append(coordStr);
         }
+
+        path.insert(0, "&path=color:blue|weight:5");
+
         String finalUrl = apiUrl + markers + path + "&key=" + apiKey;
+        System.out.println("Final URL: " + finalUrl);
 
         try {
             // Read image from URL
