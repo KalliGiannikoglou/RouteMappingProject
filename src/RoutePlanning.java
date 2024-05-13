@@ -52,9 +52,10 @@ public class RoutePlanning {
             allNodes = addNode(allNodes, node);
         }
 
+        List<RouteModel.RMNode> allNodesTraversal = new ArrayList<>(allNodes);
         // find optimal tour
         while( !checkedAll){
-            allNodes = findTraversalOrder(allNodes);
+            findTraversalOrder(allNodesTraversal);
         }
         System.out.println("Opt tour: " + optTour);
 
@@ -73,7 +74,16 @@ public class RoutePlanning {
         }
         System.out.println("Final PAth: " + rmModel.path);
         MapDisplay map = new MapDisplay(rmModel);
-        map.googleMapsDisplay(rmModel.path);
+
+        List<String> crucialPoints = new ArrayList<>();
+
+        for (String startStr : this.destPoints.keySet()){
+            crucialPoints.add(startStr);
+            for (RouteModel.RMNode point: destPoints.get(startStr)){
+                crucialPoints.add(point.getRef());
+            }
+        }
+        map.googleMapsDisplay(rmModel.path, crucialPoints);
 
     }
 
@@ -88,7 +98,7 @@ public class RoutePlanning {
     // Heuristic approach on TSP. Find a nearly optimal traversal of all the destination points provided.
     //The TSP is equivalent to finding a minimum-weight perfect matching in a complete graph
     // where the weight of an edge is the distance between two destination points.
-    public List<RouteModel.RMNode> findTraversalOrder(List<RouteModel.RMNode> nodes){
+    public void findTraversalOrder(List<RouteModel.RMNode> nodes){
         Float minDist = Float.MAX_VALUE;
         RouteModel.RMNode minNode = null;
         RouteModel.RMNode curr;
@@ -113,15 +123,13 @@ public class RoutePlanning {
 
         if(nodes.isEmpty()){
             checkedAll = true;
-            return null;
+            return;
         }
 
         // Calculate curr node distances with all the remaining in the list
         for (RouteModel.RMNode other : nodes) {
             curr.distances.add((float) curr.manhattanDist(other));
         }
-        System.out.println("Distances: " + curr.distances);
-        System.out.println("Available nodes: " + nodes);
 
         for(Float temp: curr.distances){
             // Find min of curr nodes distances
@@ -136,7 +144,7 @@ public class RoutePlanning {
             optTour.add(minNode);
             nodes.remove(minNode);
         }
-        return nodes;
+        return;
     }
 
     //The H value of every node is their distance from the end node

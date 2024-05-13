@@ -18,26 +18,19 @@ public class MapDisplay {
         this.rmModel = model;
     }
 
-    public void googleMapsDisplay(List<String> coordinates) {
+    public void googleMapsDisplay(List<String> coordinates, List<String> crucialPoints) {
 
         StringBuilder markers = new StringBuilder();
         StringBuilder path = new StringBuilder();
         Character k = 'A';
+
         for (int i = 0; i < coordinates.size(); i++) {
             String coordNode = coordinates.get(i);
             RouteModel.RMNode coord = rmModel.getRMNode(coordNode);
             // Form the coord string in Google Format
             String coordStr = coord.getLat() + "," + coord.getLon();
 
-            // If we have more than 100 points, print on every 10
-            if (coord.isStartNode && coord.isEndNode) {
-                if( !coord.addedToMap){
-                    markers.append("&markers=color:black%7Clabel:").append(k).append("%7C").append(coordStr);
-                    k++;
-                    coord.addedToMap = true;
-                }
-            }
-            else if (coord.isStartNode) {
+            if (coord.isStartNode) {
                 markers.append("&markers=color:green%7Clabel:").append(k).append("%7C").append(coordStr);
                 k++;
             }
@@ -49,6 +42,7 @@ public class MapDisplay {
             // Mark the routing with blue
             path.append("|").append(coordStr);
         }
+
 
         path.insert(0, "&path=color:blue|weight:5");
 
