@@ -75,15 +75,7 @@ public class RoutePlanning {
         System.out.println("Final PAth: " + rmModel.path);
         MapDisplay map = new MapDisplay(rmModel);
 
-        List<String> crucialPoints = new ArrayList<>();
-
-        for (String startStr : this.destPoints.keySet()){
-            crucialPoints.add(startStr);
-            for (RouteModel.RMNode point: destPoints.get(startStr)){
-                crucialPoints.add(point.getRef());
-            }
-        }
-        map.googleMapsDisplay(rmModel.path, crucialPoints);
+        map.googleMapsDisplay(rmModel.path);
 
     }
 
@@ -174,6 +166,7 @@ public class RoutePlanning {
         return this.openList.remove(this.openList.size() - 1);
     }
 
+
     public List<String> constructFinalPath(RouteModel.RMNode currNode) {
 
         // Create pathFound list
@@ -182,13 +175,14 @@ public class RoutePlanning {
         String tailStr;
         RouteModel.RMNode tail = null;
 
+        // if the path is not empty, find the last element (tail) of the path
         if (rmModel.path.size() != 0) {
-            // get the last element of the path
             tailStr = this.rmModel.path.get(rmModel.path.size() - 1);
             tail = rmModel.getRMNode(tailStr);
         }
 
         pathFound.add(currNode.getRef());
+        // keep going backwards until the tail is found, to add all the new elements
         while (currNode.prev != tail) {
             pathFound.add(currNode.prev.getRef());
             currNode = currNode.prev;

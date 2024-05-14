@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.List;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 public class MapDisplay {
     protected final RouteModel rmModel;
@@ -18,29 +20,36 @@ public class MapDisplay {
         this.rmModel = model;
     }
 
-    public void googleMapsDisplay(List<String> coordinates, List<String> crucialPoints) {
+    public void googleMapsDisplay(List<String> coordinates) {
 
         StringBuilder markers = new StringBuilder();
         StringBuilder path = new StringBuilder();
         Character k = 'A';
 
-        for (int i = 0; i < coordinates.size(); i++) {
-            String coordNode = coordinates.get(i);
-            RouteModel.RMNode coord = rmModel.getRMNode(coordNode);
+        for (String coord : coordinates) {
+            RouteModel.RMNode coordNode = rmModel.getRMNode(coord);
             // Form the coord string in Google Format
-            String coordStr = coord.getLat() + "," + coord.getLon();
-
-            if (coord.isStartNode) {
-                markers.append("&markers=color:green%7Clabel:").append(k).append("%7C").append(coordStr);
-                k++;
-            }
-            else if (coord.isEndNode) {
-                markers.append("&markers=color:red%7Clabel:").append(k).append("%7C").append(coordStr);
-                k++;
-            }
+            String coordStr = coordNode.getLat() + "," + coordNode.getLon();
 
             // Mark the routing with blue
             path.append("|").append(coordStr);
+
+            if (coordNode.isStartNode && coordNode.isEndNode) {
+                markers.append("&markers=color:green%7Clabel:").append(k).append("%7C").append(coordStr);
+                coordStr = coordNode.getLat() + "," + coordNode.getLon()*1.00001;
+                markers.append("&markers=color:red%7C").append(coordStr);
+                k++;
+
+            }
+            else if (coordNode.isStartNode) {
+                markers.append("&markers=color:green%7Clabel:").append(k).append("%7C").append(coordStr);
+                k++;
+
+            }
+            else if (coordNode.isEndNode) {
+                markers.append("&markers=color:red%7Clabel:").append(k).append("%7C").append(coordStr);
+                k++;
+            }
         }
 
 
@@ -64,6 +73,7 @@ public class MapDisplay {
         }
     }
 }
+
 
 
 
