@@ -40,26 +40,45 @@ public class Main {
         }
 
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        System.out.println("Please give the source and destination coordinates (lat, lon) in pairs. Press q to stop.");
+
+        // READ AGENTS
+        System.out.println("Please give the number of available agents.");
+        String line = br.readLine();
+        int numAgents = Integer.parseInt(line);
 
         List<Point2D> sources = new ArrayList<>();
         List<Point2D> destinations = new ArrayList<>();
-        String line = br.readLine();
         String[] parts;
+
+        AgentDistribution agents = new AgentDistribution(numAgents);
+
+
+        // READ SOURCE AND DESTINATION POINTS
+        System.out.println("Please give the source and destination coordinates (lat, lon) in pairs. Press q to stop.");
+        line = br.readLine();
         while (line.compareTo("q") != 0){
             // ##### SOURCE ####
             parts = line.split(",");
             float startLat = Float.parseFloat(parts[0]);
             float startLon = Float.parseFloat(parts[1]);
-            sources.add(new Point2D(startLon, startLat));
+            Point2D startPoint = new Point2D(startLon, startLat);
+            sources.add(startPoint);
             line = br.readLine();
+
+            if(line.compareTo("q") == 0){
+                break;
+            }
 
             // ##### DESTINATION ####
             parts = line.split(",");
             float endLat = Float.parseFloat(parts[0]);
             float endLon = Float.parseFloat(parts[1]);
-            destinations.add(new Point2D(endLon, endLat));
+            Point2D endPoint = new Point2D(endLon, endLat);
+            destinations.add(endPoint);
+
+            agents.assignNewPackage(startPoint, endPoint);
             line = br.readLine();
+
         }
 
         // Instantiate Model

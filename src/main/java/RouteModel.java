@@ -1,4 +1,5 @@
 import edu.princeton.cs.algs4.Point2D;
+import edu.princeton.cs.algs4.RectHV;
 
 import java.util.*;
 
@@ -141,6 +142,7 @@ public class RouteModel extends Model {
                 }
             }
         }
+        //System.out.println("Range: " + nodesTree.range(new RectHV( 22.948137367704074, 39.36188511945015, 22.95461292202691,39.36304048177699)));
     }
 
     public RMNode getRMNode (String ref){
