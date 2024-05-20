@@ -62,7 +62,6 @@ public class Main {
             float startLat = Float.parseFloat(parts[0]);
             float startLon = Float.parseFloat(parts[1]);
             Point2D startPoint = new Point2D(startLon, startLat);
-            sources.add(startPoint);
             line = br.readLine();
 
             if(line.compareTo("q") == 0){
@@ -74,15 +73,39 @@ public class Main {
             float endLat = Float.parseFloat(parts[0]);
             float endLon = Float.parseFloat(parts[1]);
             Point2D endPoint = new Point2D(endLon, endLat);
-            destinations.add(endPoint);
 
             agents.assignNewPackage(startPoint, endPoint);
             line = br.readLine();
 
         }
 
+        agents.displayAgents();
         // Instantiate Model
         RouteModel model = new RouteModel(osmDataList);
-        RoutePlanning routePlanner = new RoutePlanning(model, sources, destinations);
+
+        for(List<KdTree.XYZPoint> agent: agents.getAgents()){
+            // Split the points in source and destination points. Every pkg has the form of source, destination.
+            for(int i=0; i < agent.size(); i++){
+                if(i % 2 == 0)
+                    sources.add(new Point2D(agent.get(i).x, agent.get(i).y));
+                else
+                    destinations.add(new Point2D(agent.get(i).x, agent.get(i).y));
+            }
+
+            // Apply routePlanner in agent list separately
+            RoutePlanning routePlanner = new RoutePlanning(model, sources, destinations);
+
+            // clear before the next iteration
+            for(int i=0; i < sources.size(); i++){
+                RouteModel.RMNode node = model.findClosestNode((float) sources.get(i).x(), (float) destinations.get(i).y());
+                node.isStartNode = false;
+                node.isEndNode = false;
+                node.visited = false;
+            }
+
+            sources.clear();
+            destinations.clear();
+        }
+
     }
 }

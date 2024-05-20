@@ -12,6 +12,8 @@ public class RoutePlanning {
 
     // Store the final optimal tour
     List<RouteModel.RMNode> optTour = new ArrayList<>();
+    // final Path with all the points scheduled
+    protected List<String> path = new ArrayList<>();
 
     public RoutePlanning(RouteModel model,  List<Point2D> start, List<Point2D> end) {
 
@@ -72,10 +74,10 @@ public class RoutePlanning {
 
             AStarSearch(optTour.get(i).getRef(), optTour.get(i+1).getRef());
         }
-        System.out.println("Final PAth: " + rmModel.path);
+        System.out.println("Final PAth: " + path);
         MapDisplay map = new MapDisplay(rmModel);
 
-        map.googleMapsDisplay(rmModel.path);
+        map.googleMapsDisplay(path);
 
     }
 
@@ -136,7 +138,6 @@ public class RoutePlanning {
             optTour.add(minNode);
             nodes.remove(minNode);
         }
-        return;
     }
 
     //The H value of every node is their distance from the end node
@@ -176,8 +177,8 @@ public class RoutePlanning {
         RouteModel.RMNode tail = null;
 
         // if the path is not empty, find the last element (tail) of the path
-        if (rmModel.path.size() != 0) {
-            tailStr = this.rmModel.path.get(rmModel.path.size() - 1);
+        if (path.size() != 0) {
+            tailStr = path.get(path.size() - 1);
             tail = rmModel.getRMNode(tailStr);
         }
 
@@ -209,7 +210,7 @@ public class RoutePlanning {
 
             if (nextNode.getLon() == endNode.getLon() && nextNode.getLat() == endNode.getLat()) {
                 List<String> shortPath = constructFinalPath(nextNode);
-                rmModel.path.addAll(shortPath);
+                path.addAll(shortPath);
                 break;
 
             } else

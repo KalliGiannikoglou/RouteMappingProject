@@ -94,7 +94,6 @@ public class RouteModel extends Model {
         }
     }
 
-    protected List<String> path = new ArrayList<>();
     // routeModelNodes is a map with all the existing RMNodes, sorted by their node_id
     private final SortedMap<String, RMNode> routeModelNodes = new TreeMap<>();
 
