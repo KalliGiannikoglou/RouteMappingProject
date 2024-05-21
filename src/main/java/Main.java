@@ -6,7 +6,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import edu.princeton.cs.algs4.Point2D;
 
 public class Main {
     public static Optional<byte[]> readFile(String filePath) {
@@ -46,8 +45,8 @@ public class Main {
         String line = br.readLine();
         int numAgents = Integer.parseInt(line);
 
-        List<Point2D> sources = new ArrayList<>();
-        List<Point2D> destinations = new ArrayList<>();
+        List<KdTree.XYZPoint> sources = new ArrayList<>();
+        List<KdTree.XYZPoint> destinations = new ArrayList<>();
         String[] parts;
 
         AgentDistribution agents = new AgentDistribution(numAgents);
@@ -61,7 +60,7 @@ public class Main {
             parts = line.split(",");
             float startLat = Float.parseFloat(parts[0]);
             float startLon = Float.parseFloat(parts[1]);
-            Point2D startPoint = new Point2D(startLon, startLat);
+            KdTree.XYZPoint startPoint = new KdTree.XYZPoint(startLon, startLat);
             line = br.readLine();
 
             if(line.compareTo("q") == 0){
@@ -72,7 +71,7 @@ public class Main {
             parts = line.split(",");
             float endLat = Float.parseFloat(parts[0]);
             float endLon = Float.parseFloat(parts[1]);
-            Point2D endPoint = new Point2D(endLon, endLat);
+            KdTree.XYZPoint endPoint = new KdTree.XYZPoint(endLon, endLat);
 
             agents.assignNewPackage(startPoint, endPoint);
             line = br.readLine();
@@ -80,28 +79,21 @@ public class Main {
         }
 
         agents.displayAgents();
-        // Instantiate Model
-        RouteModel model = new RouteModel(osmDataList);
 
         for(List<KdTree.XYZPoint> agent: agents.getAgents()){
             // Split the points in source and destination points. Every pkg has the form of source, destination.
             for(int i=0; i < agent.size(); i++){
                 if(i % 2 == 0)
-                    sources.add(new Point2D(agent.get(i).x, agent.get(i).y));
+                    sources.add(new KdTree.XYZPoint(agent.get(i).x, agent.get(i).y));
                 else
-                    destinations.add(new Point2D(agent.get(i).x, agent.get(i).y));
+                    destinations.add(new KdTree.XYZPoint(agent.get(i).x, agent.get(i).y));
             }
+
+            // Instantiate Model
+            RouteModel model = new RouteModel(osmDataList);
 
             // Apply routePlanner in agent list separately
             RoutePlanning routePlanner = new RoutePlanning(model, sources, destinations);
-
-            // clear before the next iteration
-            for(int i=0; i < sources.size(); i++){
-                RouteModel.RMNode node = model.findClosestNode((float) sources.get(i).x(), (float) destinations.get(i).y());
-                node.isStartNode = false;
-                node.isEndNode = false;
-                node.visited = false;
-            }
 
             sources.clear();
             destinations.clear();

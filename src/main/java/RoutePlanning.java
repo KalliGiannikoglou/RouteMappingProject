@@ -1,5 +1,3 @@
-import edu.princeton.cs.algs4.Point2D;
-
 import java.util.*;
 
 public class RoutePlanning {
@@ -15,7 +13,7 @@ public class RoutePlanning {
     // final Path with all the points scheduled
     protected List<String> path = new ArrayList<>();
 
-    public RoutePlanning(RouteModel model,  List<Point2D> start, List<Point2D> end) {
+    public RoutePlanning(RouteModel model, List<KdTree.XYZPoint> start, List<KdTree.XYZPoint> end) {
 
         // Initialize the RMModel attribute
         this.rmModel = model;
@@ -27,13 +25,13 @@ public class RoutePlanning {
 
         for(int i = 0; i < start.size(); i++) {
             //  ##### START NODES ####
-            this.startPoints.add(rmModel.findClosestNode((float) start.get(i).x(), (float) start.get(i).y()));
+            this.startPoints.add(rmModel.findClosestNode((float) start.get(i).x, (float) start.get(i).y));
             this.startPoints.get(i).isStartNode = true;
             String currStartRef = this.startPoints.get(i).getRef();
 
             // ##### END NODES ####
             // end nodes are defined by their start pair, we have a lists with all the desination points that have the same source
-            RouteModel.RMNode newNode = rmModel.findClosestNode((float) end.get(i).x(), (float) end.get(i).y());
+            RouteModel.RMNode newNode = rmModel.findClosestNode((float) end.get(i).x, (float) end.get(i).y);
             newNode.isEndNode = true;
             if(this.destPoints.containsKey(currStartRef)){
                 this.destPoints.get(currStartRef).add(newNode);
