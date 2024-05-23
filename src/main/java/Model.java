@@ -18,20 +18,14 @@ public class Model {
     private final Map<Integer, Leisure> leisures = new HashMap<>();
     private final Map<Integer, Water> waters = new HashMap<>();
     private final Map<Integer, Landuse> landuses = new HashMap<>();
-    protected final Map<String, Integer> wayIdHashMap = new HashMap<String, Integer>();
-
-    private double minLat = 0.0;
-    private double minLon = 0.0;
-    private double maxLat = 0.0;
-    private double maxLon = 0.0;
-    private final double metricScale = 1.0;
+    protected final Map<String, Integer> wayIdHashMap = new HashMap<>();
 
     public Model(List<Byte> xml) {
         LoadData(xml);
     }
 
     public double getMetricScale() {
-        return metricScale;
+        return 1.0;
     }
 
     public Map<String, Node> getNodes() {
@@ -43,7 +37,7 @@ public class Model {
         // Implementation of adjustCoordinates method
     }
 
-    private void buildRings(MultiPolygon mp) {
+    private void buildRings() {
         // Implementation of buildRings method
     }
 
@@ -113,10 +107,10 @@ public class Model {
             // Parse bounds
             Element boundsElement = doc.selectFirst("osm > bounds");
             if (boundsElement != null) {
-                minLat = Double.parseDouble(boundsElement.attr("minlat"));
-                minLon = Double.parseDouble(boundsElement.attr("minlon"));
-                maxLat = Double.parseDouble(boundsElement.attr("maxlat"));
-                maxLon = Double.parseDouble(boundsElement.attr("maxlon"));
+                double minLat = Double.parseDouble(boundsElement.attr("minlat"));
+                double minLon = Double.parseDouble(boundsElement.attr("minlon"));
+                double maxLat = Double.parseDouble(boundsElement.attr("maxlat"));
+                double maxLon = Double.parseDouble(boundsElement.attr("maxlon"));
             } else {
                 throw new IllegalStateException("Error in map bounds");
             }

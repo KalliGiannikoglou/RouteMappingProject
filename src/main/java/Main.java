@@ -45,42 +45,61 @@ public class Main {
         String line = br.readLine();
         int numAgents = Integer.parseInt(line);
 
+        System.out.println("Please give the maximum amount of packets for each agent.");
+        line = br.readLine();
+        int maxCapacity = Integer.parseInt(line);
+
         List<KdTree.XYZPoint> sources = new ArrayList<>();
         List<KdTree.XYZPoint> destinations = new ArrayList<>();
         String[] parts;
 
-        AgentDistribution agents = new AgentDistribution(numAgents);
+        // initialize agentDistribution class
+        AgentDistribution agentDistr = new AgentDistribution(numAgents, maxCapacity);
 
+        // Add initial positions of all the available agents
+        System.out.println("Please give the initial position of all agents.");
+        for(int i = 0; i < numAgents; i++){
 
-        // READ SOURCE AND DESTINATION POINTS
+            line = br.readLine();
+            parts = line.split(",");
+            float initLat = Float.parseFloat(parts[0]);
+            float initLon = Float.parseFloat(parts[1]);
+            KdTree.XYZPoint initPosition = new KdTree.XYZPoint(initLon, initLat);
+
+            agentDistr.addAgentsPosition(initPosition);
+
+        }
+
+            // READ SOURCE AND DESTINATION POINTS
         System.out.println("Please give the source and destination coordinates (lat, lon) in pairs. Press q to stop.");
-        line = br.readLine();
-        while (line.compareTo("q") != 0){
+        while (true){
+
+            line = br.readLine();
+            if(line.compareTo("q") == 0){
+                break;
+            }
             // ##### SOURCE ####
             parts = line.split(",");
             float startLat = Float.parseFloat(parts[0]);
             float startLon = Float.parseFloat(parts[1]);
             KdTree.XYZPoint startPoint = new KdTree.XYZPoint(startLon, startLat);
-            line = br.readLine();
 
-            if(line.compareTo("q") == 0){
-                break;
-            }
 
             // ##### DESTINATION ####
+            line = br.readLine();
             parts = line.split(",");
             float endLat = Float.parseFloat(parts[0]);
             float endLon = Float.parseFloat(parts[1]);
             KdTree.XYZPoint endPoint = new KdTree.XYZPoint(endLon, endLat);
 
-            agents.assignNewPackage(startPoint, endPoint);
-            line = br.readLine();
+            agentDistr.assignNewPackage(startPoint, endPoint);
+
 
         }
 
-        agents.displayAgents();
+        agentDistr.displayAgents();
 
-        for(List<KdTree.XYZPoint> agent: agents.getAgents()){
+        for(List<KdTree.XYZPoint> agent: agentDistr.getAgents()){
             // Split the points in source and destination points. Every pkg has the form of source, destination.
             for(int i=0; i < agent.size(); i++){
                 if(i % 2 == 0)
@@ -101,3 +120,4 @@ public class Main {
 
     }
 }
+

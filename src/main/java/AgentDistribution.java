@@ -3,15 +3,18 @@ import java.util.*;
 public class AgentDistribution {
     int numOfAgents;
     int totalPkgs;
-    int maxCapacity;
+    int loadFactor;
+    int MAX_CAPACITY;
+
     KdTree<KdTree.XYZPoint> packages = new KdTree<>();
     SortedMap<KdTree.XYZPoint, Integer> assignedPkgs = new TreeMap<>();
     List<List<KdTree.XYZPoint>> agents = new ArrayList<>();
 
-    public AgentDistribution(int nAgents){
+    public AgentDistribution(int nAgents, int max_capacity){
         this.numOfAgents = nAgents;
         this.totalPkgs = 0;
-        this.maxCapacity = 0;
+        this.loadFactor = 0;
+        MAX_CAPACITY = max_capacity;
     }
 
     public List<List<KdTree.XYZPoint>> getAgents(){ return agents; }
@@ -26,6 +29,11 @@ public class AgentDistribution {
         while (!added){
             // for the first pkg, assign it to the first agent
             if(nearestPkg.isEmpty()){
+                // TO BE ADJUSTED
+                if(agents.size() == numOfAgents){
+                    System.out.println("No agent is available at the moment!");
+                    return;
+                }
                 // create new list
                 List<KdTree.XYZPoint> list = new ArrayList<>();
                 addPkg(xySource, list);
@@ -38,9 +46,10 @@ public class AgentDistribution {
                 List<KdTree.XYZPoint> agentsPkgs = agents.get(agentNum);
 
                 // we define a maxCapacity which changes dynamically every time we add pakgs
-                maxCapacity = totalPkgs / numOfAgents;
+                loadFactor = totalPkgs / numOfAgents;
                 // we have to apply /2, since every pkg has 2 points in the list (src and dest)
-                if( (agentsPkgs.size()/2) <= maxCapacity){
+                int currPkgs = agentsPkgs.size()/2;
+                if( currPkgs < MAX_CAPACITY && currPkgs <= loadFactor){
                     addPkg(xySource, agentsPkgs);
                     addPkg(xyDestination, agentsPkgs);
                     totalPkgs++;
@@ -66,6 +75,10 @@ public class AgentDistribution {
             agents.add(agentList);
         }
         assignedPkgs.put(xySource, agents.indexOf(agentList));
+    }
+
+    public void addAgentsPosition(KdTree.XYZPoint initPoint){
+        packages.add(initPoint);
     }
 
     public void displayAgents(){
