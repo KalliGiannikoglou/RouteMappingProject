@@ -51,6 +51,7 @@ public class Main {
 
         List<KdTree.XYZPoint> sources = new ArrayList<>();
         List<KdTree.XYZPoint> destinations = new ArrayList<>();
+        List<KdTree.XYZPoint> agentsPositions = new ArrayList<>();
         String[] parts;
 
         // initialize agentDistribution class
@@ -65,12 +66,13 @@ public class Main {
             float initLat = Float.parseFloat(parts[0]);
             float initLon = Float.parseFloat(parts[1]);
             KdTree.XYZPoint initPosition = new KdTree.XYZPoint(initLon, initLat);
+            agentsPositions.add(new KdTree.XYZPoint(initLon, initLat));
 
             agentDistr.addAgentsPosition(initPosition);
 
         }
 
-            // READ SOURCE AND DESTINATION POINTS
+        // READ SOURCE AND DESTINATION POINTS
         System.out.println("Please give the source and destination coordinates (lat, lon) in pairs. Press q to stop.");
         while (true){
 
@@ -99,20 +101,28 @@ public class Main {
 
         agentDistr.displayAgents();
 
-        for(List<KdTree.XYZPoint> agent: agentDistr.getAgents()){
+        // Apply routePlanner for each one of the agents
+        for(List<KdTree.XYZPoint> agentList: agentDistr.getAgents()){
+
+            // get agent's initial position and add it as the first source
+            int agentIdx = agentDistr.getAgents().indexOf(agentList);
+            KdTree.XYZPoint agentPos = agentsPositions.get(agentIdx);
+            sources.add(agentPos);
+            // add the first source as the first agents destination
+            destinations.add(agentList.get(0));
+
             // Split the points in source and destination points. Every pkg has the form of source, destination.
-            for(int i=0; i < agent.size(); i++){
+            for(int i=0; i < agentList.size(); i++){
                 if(i % 2 == 0)
-                    sources.add(new KdTree.XYZPoint(agent.get(i).x, agent.get(i).y));
+                    sources.add(new KdTree.XYZPoint(agentList.get(i).x, agentList.get(i).y));
                 else
-                    destinations.add(new KdTree.XYZPoint(agent.get(i).x, agent.get(i).y));
+                    destinations.add(new KdTree.XYZPoint(agentList.get(i).x, agentList.get(i).y));
             }
 
             // Instantiate Model
             RouteModel model = new RouteModel(osmDataList);
-
-            // Apply routePlanner in agent list separately
-            RoutePlanning routePlanner = new RoutePlanning(model, sources, destinations);
+            // Apply routePlanner in each agent's list separately
+            RoutePlanning routePlanner = new RoutePlanning(model, sources, destinations, agentPos);
 
             sources.clear();
             destinations.clear();

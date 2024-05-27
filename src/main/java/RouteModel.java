@@ -11,6 +11,7 @@ public class RouteModel extends Model {
         protected boolean visited = false;
         public boolean isEndNode = false;
         public boolean isStartNode = false;
+        public boolean isAgentLocation = false;
         protected List<RMNode> neighbors = new ArrayList<>();
         // tour planning
         protected List<Float> distances = new ArrayList<>();

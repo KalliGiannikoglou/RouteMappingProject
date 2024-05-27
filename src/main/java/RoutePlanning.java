@@ -13,7 +13,7 @@ public class RoutePlanning {
     // final Path with all the points scheduled
     protected List<String> path = new ArrayList<>();
 
-    public RoutePlanning(RouteModel model, List<KdTree.XYZPoint> start, List<KdTree.XYZPoint> end) {
+    public RoutePlanning(RouteModel model, List<KdTree.XYZPoint> start, List<KdTree.XYZPoint> end, KdTree.XYZPoint agentLocation) {
 
         // Initialize the RMModel attribute
         this.rmModel = model;
@@ -26,13 +26,23 @@ public class RoutePlanning {
         for(int i = 0; i < start.size(); i++) {
             //  ##### START NODES ####
             this.startPoints.add(rmModel.findClosestNode((float) start.get(i).x, (float) start.get(i).y));
-            this.startPoints.get(i).isStartNode = true;
+            // the first source point is the agents location
+            if(i > 0)
+                this.startPoints.get(i).isStartNode = true;
+            else
+                this.startPoints.get(i).isAgentLocation = true;
+
             String currStartRef = this.startPoints.get(i).getRef();
 
             // ##### END NODES ####
             // end nodes are defined by their start pair, we have a lists with all the desination points that have the same source
             RouteModel.RMNode newNode = rmModel.findClosestNode((float) end.get(i).x, (float) end.get(i).y);
-            newNode.isEndNode = true;
+
+            // the first end node is a "fake" the pair for agents location, not an actual destination
+            if(i > 0)
+                newNode.isEndNode = true;
+
+
             if(this.destPoints.containsKey(currStartRef)){
                 this.destPoints.get(currStartRef).add(newNode);
             }
@@ -42,7 +52,6 @@ public class RoutePlanning {
                 destPoints.put(currStartRef, newDestList);
             }
         }
-
 
         // Create a list with start node first and all the destination nodes after
         List<RouteModel.RMNode> allNodes = new ArrayList<>();
@@ -75,7 +84,7 @@ public class RoutePlanning {
         System.out.println("Final PAth: " + path);
         MapDisplay map = new MapDisplay(rmModel);
 
-        map.googleMapsDisplay(path);
+        map.googleMapsDisplay(path, agentLocation);
 
     }
 
@@ -182,7 +191,7 @@ public class RoutePlanning {
 
         pathFound.add(currNode.getRef());
         // keep going backwards until the tail is found, to add all the new elements
-        while (currNode.prev != tail) {
+        while (currNode.prev != tail && currNode.prev != null) {
             pathFound.add(currNode.prev.getRef());
             currNode = currNode.prev;
         }

@@ -11,30 +11,35 @@ public class MapDisplay {
     // Google Static Maps API URL (Define window size)
     String apiUrl = "https://maps.googleapis.com/maps/api/staticmap?size=750x750&";
     // my API Key
-    String apiKey = "AIzaSyCv3MQCBBotp_djJT9hAD4KsMfBMqQUyLY";
+    String apiKey = "";
 
     // Default Constructor
     public MapDisplay(RouteModel model) {
         this.rmModel = model;
     }
 
-    public void googleMapsDisplay(List<String> coordinates) {
+    public void googleMapsDisplay(List<String> coordinates, KdTree.XYZPoint agentPos) {
 
         StringBuilder markers = new StringBuilder();
         StringBuilder path = new StringBuilder();
         Character k = 'A';
+        String coordStr;
+
+        // Add agent location with blue
+        coordStr = String.format("%.4f", agentPos.y) + "," + String.format("%.4f", agentPos.x);
+        markers.append("&markers=color:blue%7C").append(coordStr);
 
         for (String coord : coordinates) {
             RouteModel.RMNode coordNode = rmModel.getRMNode(coord);
             // Form the coord string in Google Format
-            String coordStr = coordNode.getLat() + "," + coordNode.getLon();
+            coordStr = String.format("%.4f", coordNode.getLat()) + "," + String.format("%.4f", coordNode.getLon());
 
             // Mark the routing with blue
             path.append("|").append(coordStr);
 
             if (coordNode.isStartNode && coordNode.isEndNode) {
                 markers.append("&markers=color:green%7Clabel:").append(k).append("%7C").append(coordStr);
-                coordStr = coordNode.getLat() + "," + coordNode.getLon()*1.00001;
+                coordStr = coordNode.getLat() + "," + coordNode.getLon()*1.000001;
                 markers.append("&markers=color:red%7C").append(coordStr);
                 k++;
 
