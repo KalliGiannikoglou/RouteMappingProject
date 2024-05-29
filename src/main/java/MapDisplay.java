@@ -25,17 +25,23 @@ public class MapDisplay {
         Character k = 'A';
         String coordStr;
 
+        System.out.println("Coordinates size: " + coordinates.size());
+
         // Add agent location with blue
         coordStr = String.format("%.4f", agentPos.y) + "," + String.format("%.4f", agentPos.x);
         markers.append("&markers=color:blue%7C").append(coordStr);
 
+        int i = 0;
         for (String coord : coordinates) {
             RouteModel.RMNode coordNode = rmModel.getRMNode(coord);
             // Form the coord string in Google Format
             coordStr = String.format("%.4f", coordNode.getLat()) + "," + String.format("%.4f", coordNode.getLon());
 
             // Mark the routing with blue
-            path.append("|").append(coordStr);
+            if(coordinates.size() < 1000 || i%2 == 0) {
+                path.append("|").append(coordStr);
+            }
+            i++;
 
             if (coordNode.isStartNode && coordNode.isEndNode) {
                 markers.append("&markers=color:green%7Clabel:").append(k).append("%7C").append(coordStr);

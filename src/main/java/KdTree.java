@@ -292,6 +292,7 @@ public class KdTree<T extends KdTree.XYZPoint> implements Iterable<T> {
 
         KdNode parent = node.parent;
         List<XYZPoint> nodes = getTree(node);
+
         if (parent != null) {
             if (parent.lesser != null && node.equals(parent.lesser)) {
                 if (nodes.size() > 0) {
@@ -323,6 +324,7 @@ public class KdTree<T extends KdTree.XYZPoint> implements Iterable<T> {
         return true;
     }
 
+
     /**
      * Gets the (sub) tree rooted at root.
      *
@@ -330,8 +332,8 @@ public class KdTree<T extends KdTree.XYZPoint> implements Iterable<T> {
      *            of tree to get nodes for.
      * @return points in (sub) tree, not including root.
      */
-    private static final List<XYZPoint> getTree(KdNode root) {
-        List<XYZPoint> list = new ArrayList<XYZPoint>();
+    private static List<XYZPoint> getTree(KdNode root) {
+        List<XYZPoint> list = new ArrayList<>();
         if (root == null)
             return list;
 
@@ -363,7 +365,7 @@ public class KdTree<T extends KdTree.XYZPoint> implements Iterable<T> {
             return Collections.EMPTY_LIST;
 
         // Map used for results
-        TreeSet<KdNode> results = new TreeSet<KdNode>(new EuclideanComparator(value));
+        TreeSet<KdNode> results = new TreeSet<>(new EuclideanComparator(value));
 
         // Find the closest leaf node
         KdNode prev = null;
@@ -383,7 +385,7 @@ public class KdTree<T extends KdTree.XYZPoint> implements Iterable<T> {
 
         if (leaf != null) {
             // Used to not re-examine nodes
-            Set<KdNode> examined = new HashSet<KdNode>();
+            Set<KdNode> examined = new HashSet<>();
 
             // Go up the tree, looking for better solutions
             node = leaf;
@@ -395,7 +397,7 @@ public class KdTree<T extends KdTree.XYZPoint> implements Iterable<T> {
         }
 
         // Load up the collection of the results
-        Collection<T> collection = new ArrayList<T>(K);
+        Collection<T> collection = new ArrayList<>(K);
         for (KdNode kdNode : results)
             collection.add((T) kdNode.id);
         return collection;
@@ -549,9 +551,9 @@ public class KdTree<T extends KdTree.XYZPoint> implements Iterable<T> {
 
     public static class KdNode implements Comparable<KdNode> {
 
-        private final XYZPoint id;
+        private XYZPoint id;
         private final int k;
-        private final int depth;
+        private int depth;
 
         private KdNode parent = null;
         private KdNode lesser = null;
@@ -559,7 +561,7 @@ public class KdTree<T extends KdTree.XYZPoint> implements Iterable<T> {
 
         public KdNode(XYZPoint id) {
             this.id = id;
-            this.k = 3;
+            this.k = 2;
             this.depth = 0;
         }
 

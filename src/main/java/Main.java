@@ -38,9 +38,28 @@ public class Main {
             osmDataList.add(b);
         }
 
+        //KdTree tree = new KdTree();
+        //KdTree.XYZPoint point = new KdTree.XYZPoint(1.0, 1.0, 0);
+        //tree.add(point);
+        //tree.add(point);
+        //tree.add(point);
+        //tree.add(point);
+        //tree.add(point);
+        //tree.add(point);
+        //tree.add(point);
+        //tree.add(point);
+        //tree.add(point);
+        //
+        //System.out.println(tree);
+        //while (tree.contains(point)){
+        //    tree.remove(point);
+        //    System.out.println(tree);
+        //}
+
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        // READ AGENTS
+
+        // ################## READ AGENTS #######################################
         System.out.println("Please give the number of available agents.");
         String line = br.readLine();
         int numAgents = Integer.parseInt(line);
@@ -86,7 +105,6 @@ public class Main {
             float startLon = Float.parseFloat(parts[1]);
             KdTree.XYZPoint startPoint = new KdTree.XYZPoint(startLon, startLat);
 
-
             // ##### DESTINATION ####
             line = br.readLine();
             parts = line.split(",");
@@ -95,8 +113,6 @@ public class Main {
             KdTree.XYZPoint endPoint = new KdTree.XYZPoint(endLon, endLat);
 
             agentDistr.assignNewPackage(startPoint, endPoint);
-
-
         }
 
         agentDistr.displayAgents();
@@ -112,8 +128,9 @@ public class Main {
             destinations.add(agentList.get(0));
 
             // Split the points in source and destination points. Every pkg has the form of source, destination.
-            for(int i=0; i < agentList.size(); i++){
-                if(i % 2 == 0)
+            // for i=0 we have the initial position of the agent
+            for(int i=1; i < agentList.size(); i++){
+                if(i % 2 == 1)
                     sources.add(new KdTree.XYZPoint(agentList.get(i).x, agentList.get(i).y));
                 else
                     destinations.add(new KdTree.XYZPoint(agentList.get(i).x, agentList.get(i).y));
