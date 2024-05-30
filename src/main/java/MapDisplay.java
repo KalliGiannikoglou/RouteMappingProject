@@ -27,41 +27,45 @@ public class MapDisplay {
 
         System.out.println("Coordinates size: " + coordinates.size());
 
-        // Add agent location with blue
+        // Add agent location with blue marker and limit all coords to .4 digits
         coordStr = String.format("%.4f", agentPos.y) + "," + String.format("%.4f", agentPos.x);
         markers.append("&markers=color:blue%7C").append(coordStr);
 
         int i = 0;
         for (String coord : coordinates) {
             RouteModel.RMNode coordNode = rmModel.getRMNode(coord);
-            // Form the coord string in Google Format
+            // Form the coord string in Google Format with .4 digits
             coordStr = String.format("%.4f", coordNode.getLat()) + "," + String.format("%.4f", coordNode.getLon());
 
             // Mark the routing with blue
-            if(coordinates.size() < 1000 || i%2 == 0) {
+            // Google Maps limitation for 2000 points, so if they are more than 1000 we cut some
+            if(coordinates.size() < 1000 || i % 2 == 0) {
                 path.append("|").append(coordStr);
             }
             i++;
 
+            // If it is both start and end node add two markers (green and red)
             if (coordNode.isStartNode && coordNode.isEndNode) {
-                markers.append("&markers=color:green%7Clabel:").append(k).append("%7C").append(coordStr);
+                markers.append("&markers=color:green%7C").append(coordStr);
                 coordStr = coordNode.getLat() + "," + coordNode.getLon()*1.000001;
-                markers.append("&markers=color:red%7C").append(coordStr);
+                markers.append("&markers=color:red%7Clabel:").append(k).append("%7C").append(coordStr);
                 k++;
 
             }
             else if (coordNode.isStartNode) {
+                // Add only green marker for start nodes and a label
                 markers.append("&markers=color:green%7Clabel:").append(k).append("%7C").append(coordStr);
                 k++;
 
             }
             else if (coordNode.isEndNode) {
+                // Add only red marker for end nodes and a label
                 markers.append("&markers=color:red%7Clabel:").append(k).append("%7C").append(coordStr);
                 k++;
             }
         }
 
-
+        // the rest of the path is marked with blue color
         path.insert(0, "&path=color:blue|weight:5");
 
         String finalUrl = apiUrl + markers + path + "&key=" + apiKey;

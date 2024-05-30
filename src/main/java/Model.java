@@ -1,4 +1,3 @@
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.List;
@@ -13,51 +12,18 @@ public class Model {
     private final Map<String, Node> nodes = new HashMap<>();
     private final Map<String, Way> ways = new HashMap<>();
     private final Map<Integer, Road> roads = new HashMap<>();
-    private final Map<Integer, Railway> railways = new HashMap<>();
-    private final Map<Integer, Building> buildings = new HashMap<>();
-    private final Map<Integer, Leisure> leisures = new HashMap<>();
-    private final Map<Integer, Water> waters = new HashMap<>();
-    private final Map<Integer, Landuse> landuses = new HashMap<>();
-    protected final Map<String, Integer> wayIdHashMap = new HashMap<>();
+
+    double minLat;
+    double maxLat;
+    double minLon;
+    double maxLon;
 
     public Model(List<Byte> xml) {
         LoadData(xml);
     }
 
-    public double getMetricScale() {
-        return 1.0;
-    }
-
     public Map<String, Node> getNodes() {
         return nodes;
-    }
-
-
-    private void adjustCoordinates() {
-        // Implementation of adjustCoordinates method
-    }
-
-    private void buildRings() {
-        // Implementation of buildRings method
-    }
-
-    public static Landuse.Type StringToLanduseType(String type) {
-        if (type.equals("commercial"))
-            return Landuse.Type.Commercial;
-        else if (type.equals("construction"))
-            return Landuse.Type.Construction;
-        else if (type.equals("forest"))
-            return Landuse.Type.Forest;
-        else if (type.equals("grass") || (type.equals("greenfield") ||  type.equals("orchard")))
-            return Landuse.Type.Grass;
-        else if (type.equals("industrial"))
-            return Landuse.Type.Industrial;
-        else if (type.equals("railway"))
-            return Landuse.Type.Railway;
-        else if (type.equals("residential"))
-            return Landuse.Type.Residential;
-        else
-            return Landuse.Type.Invalid;
     }
 
     public static Road.Type StringToHighwayType(String type) {
@@ -97,9 +63,8 @@ public class Model {
         try {
             // Convert list of bytes to a string
             StringBuilder xmlString = new StringBuilder();
-            for (byte b : xml) {
+            for (byte b : xml)
                 xmlString.append((char) b);
-            }
 
             // Parse XML document using Jsoup
             Document doc = Jsoup.parse(xmlString.toString());
@@ -107,10 +72,10 @@ public class Model {
             // Parse bounds
             Element boundsElement = doc.selectFirst("osm > bounds");
             if (boundsElement != null) {
-                double minLat = Double.parseDouble(boundsElement.attr("minlat"));
-                double minLon = Double.parseDouble(boundsElement.attr("minlon"));
-                double maxLat = Double.parseDouble(boundsElement.attr("maxlat"));
-                double maxLon = Double.parseDouble(boundsElement.attr("maxlon"));
+                this.minLat = Double.parseDouble(boundsElement.attr("minlat"));
+                this.minLon = Double.parseDouble(boundsElement.attr("minlon"));
+                this.maxLat = Double.parseDouble(boundsElement.attr("maxlat"));
+                this.maxLon = Double.parseDouble(boundsElement.attr("maxlon"));
             } else {
                 throw new IllegalStateException("Error in map bounds");
             }
@@ -125,7 +90,6 @@ public class Model {
             }
 
             // Parse ways
-            // Assuming xml_doc is already parsed using Jsoup
             Elements wayElements = doc.select("osm > way");
 
             for (Element way : wayElements) {
@@ -134,10 +98,9 @@ public class Model {
                 // Get the last current int as number in the map
                 double wayNum = ways.size();
                 try{
-                    Way newWay = new Way(id, (int)wayNum);
+                    Way newWay = new Way(id);
                     // Add the new way in Ways map
                     ways.put(id, newWay);
-                    wayIdHashMap.put(id, (int) wayNum);
 
                     // Iterate through children nodes
                     for (Element child : way.children()) {
@@ -166,39 +129,7 @@ public class Model {
                                     roads.put((int) wayNum, new_road);
                                 }
                             }
-
-                            if (category.equals("railway")) {
-                                Railway new_railway = new Railway((int) wayNum);
-                                railways.put((int) wayNum, new_railway);
-                            } else if (category.equals("building")) {
-                                List<Integer> outer = new ArrayList<>();
-                                outer.add((int) wayNum);
-                                Building new_building = new Building(outer);
-                                buildings.put((int) wayNum, new_building);
-                            } else if (category.equals("leisure") ||
-                                    (category.equals("natural") && (type.equals("wood") || type.equals("tree_row") ||
-                                            type.equals("scrub") || type.equals("grassland"))) ||
-                                    (category.equals("landcover") && type.equals("grass"))) {
-                                List<Integer> outer = new ArrayList<>();
-                                outer.add((int) wayNum);
-                                Leisure new_leisure = new Leisure(outer);
-                                leisures.put((int) wayNum, new_leisure);
-                            } else if (category.equals("natural") && type.equals("water")) {
-                                List<Integer> outer = new ArrayList<>();
-                                outer.add((int) wayNum);
-                                Water new_water = new Water(outer);
-                                waters.put((int) wayNum, new_water);
-                            } else if (category.equals("landuse")) {
-                                Landuse.Type landuse_type = StringToLanduseType(type);
-                                if (landuse_type != Landuse.Type.Invalid) {
-                                    List<Integer> outer = new ArrayList<>();
-                                    outer.add((int) wayNum);
-                                    Landuse new_landuse = new Landuse(outer, landuse_type);
-                                    landuses.put((int) wayNum, new_landuse);
-                                }
-                            }
                         }
-
                     }
                 } catch (OutOfMemoryError e) {
                     System.err.println("Out of memory error: " + e.getMessage());
@@ -208,5 +139,13 @@ public class Model {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
+
+    // check if a given point is inside map's bounds
+    public boolean isInBounds(double lat, double lon){
+        if(lat >= this.minLat && lat <= this.maxLat){
+            return lon >= this.minLon && lon <= this.maxLon;
+        }
+        return false;
     }
 }

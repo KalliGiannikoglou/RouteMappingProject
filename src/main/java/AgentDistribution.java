@@ -6,8 +6,6 @@ public class AgentDistribution {
     int loadFactor;
     int MAX_CAPACITY;
 
-    // List with all the initial location of the agents
-    List<KdTree.XYZPoint> agentsLocations = new ArrayList<>();
     //KdTree with all the existing packages
     KdTree<KdTree.XYZPoint> packages = new KdTree<>();
     // Sorted map where every point is mapped with all the agents that have this location in their list
@@ -40,19 +38,6 @@ public class AgentDistribution {
                 System.out.println("Sorry, no agents available!");
                 break;
             }
-            // if the packet is near any of the agents
-            else if(agentsLocations.contains(nearestPkg.get(0))){
-                // create new list and add new package
-                List<KdTree.XYZPoint> list = new ArrayList<>();
-                addPkg(xySource, list);
-                addPkg(xyDestination, list);
-                totalPkgs++;
-                added = true;
-
-                // remove agent's location from the tree and the agent's location list
-                boolean removed = packages.remove(nearestPkg.get(0));
-                agentsLocations.remove(nearestPkg.get(0));
-            }
             else {
                 // get the agent number from assignedPkgs list, get the first available item each time
                 List<Integer> intList = assignedPkgs.get(nearestPkg.get(0));
@@ -66,7 +51,7 @@ public class AgentDistribution {
                         loadFactor = totalPkgs / numOfAgents;
                         // we have to apply /2, since every pkg has 2 points in the list (src and dest)
                         int currPkgs = agentsPkgs.size() / 2;
-                        if (currPkgs < MAX_CAPACITY && currPkgs <= (loadFactor+1)) {
+                        if (currPkgs < MAX_CAPACITY && currPkgs <= loadFactor) {
                             addPkg(xySource, agentsPkgs);
                             addPkg(xyDestination, agentsPkgs);
                             totalPkgs++;
@@ -81,34 +66,34 @@ public class AgentDistribution {
                 }
             }
 
-            //KdTree.XYZPoint prev = nearestPkg.get(0);
             nearestPkg = (List<KdTree.XYZPoint>) tempTree.nearestNeighbourSearch(1, xySource);
-
         }
     }
 
     public void addPkg(KdTree.XYZPoint newPoint, List<KdTree.XYZPoint> currAgentList){
 
+        // add the new point to the KdTree and in curr agent's list
         packages.add(newPoint);
         currAgentList.add(newPoint);
-        // if size = 1, this was the first added element. Thus, the list (new agent) must be inserted in list of lists
-        if(currAgentList.size() == 1){
-            agents.add(currAgentList);
-        }
 
-        // if the point is already assigned to one agent, add the second occurrence in the list
-        // else, create a new list for the new point and add it
+        // If size == 1, this was the first added element.
+        // Thus, the list (new agent) must be inserted in list of lists
+        if(currAgentList.size() == 1)
+            agents.add(currAgentList);
+
+        // If the point was already assigned to an agent, add the second agent in the pkg list
         if(assignedPkgs.containsKey(newPoint)) {
             // get all the lists (agent indexes) newPoint exists
             List<Integer> allPkgOccurrences = assignedPkgs.get(newPoint);
             // get index of curr list (agent)
             int currInt = agents.indexOf(currAgentList);
+
             // if the mapping between point and agent does not exist, add it
-            if(!allPkgOccurrences.contains(currInt)) {
+            if(!allPkgOccurrences.contains(currInt))
                 assignedPkgs.get(newPoint).add(agents.indexOf(currAgentList));
-                System.out.println("Assigning agent " + agents.indexOf(currAgentList) + " to point " + newPoint);
-            }
+
         }
+        // else, create a new list for the new point and add it
         else{
             List<Integer> pkgAgents = new ArrayList<>();
             pkgAgents.add(agents.indexOf(currAgentList));
@@ -117,10 +102,10 @@ public class AgentDistribution {
 
     }
 
+    // initially we get all the starting positions of the agents, and we add them as "packages" to the tree
+    // So we can search them in nearest Neighbour process and assign packages that are closer to their location
     public void addAgentsPosition(KdTree.XYZPoint initPoint){
 
-        //packages.add(initPoint);
-        //agentsLocations.add(initPoint);
         List<KdTree.XYZPoint> newList = new ArrayList<>();
         addPkg(initPoint, newList);
     }

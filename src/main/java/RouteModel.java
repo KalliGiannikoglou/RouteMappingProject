@@ -16,8 +16,6 @@ public class RouteModel extends Model {
         // tour planning
         protected List<Float> distances = new ArrayList<>();
 
-        public int getIndex() { return index; }
-
         public RMNode( int idx, RouteModel parentModel, Node node) {
             super(node);
             this.parentModel = parentModel;
@@ -41,7 +39,6 @@ public class RouteModel extends Model {
                 if (newNeighbor != null) {
                     this.neighbors.add(newNeighbor);
                 }
-
             }
         }
 
@@ -95,9 +92,7 @@ public class RouteModel extends Model {
     // roadToNodes links a road id with all the ways it belongs
     private final Map<String, List<Road>> roadToWay = new HashMap<>();
 
-    //protected KDTree nodesTree = new KDTree();
     protected KdTree<KdTree.XYZPoint> nodesTree = new KdTree<>();
-    //private final SortedMap<Point2D, String> pointToRef = new TreeMap<>();
     private final SortedMap<KdTree.XYZPoint, String> pointToRef = new TreeMap<>();
 
     public RouteModel(List<Byte> xml) {
@@ -134,12 +129,10 @@ public class RouteModel extends Model {
                     RouteModel.RMNode roadNode = getRouteModelNodes().get(node_idx);
                     KdTree.XYZPoint point = new KdTree.XYZPoint(roadNode.getLon(), roadNode.getLat());
                     nodesTree.add(point);
-                    //nodesTree.insert(point);
                     pointToRef.put(point, roadNode.getRef());
                 }
             }
         }
-        //System.out.println("Range: " + nodesTree.range(new RectHV( 22.948137367704074, 39.36188511945015, 22.95461292202691,39.36304048177699)));
     }
 
     public RMNode getRMNode (String ref){

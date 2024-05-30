@@ -37,27 +37,10 @@ public class Main {
         for (byte b : osmData) {
             osmDataList.add(b);
         }
-
-        //KdTree tree = new KdTree();
-        //KdTree.XYZPoint point = new KdTree.XYZPoint(1.0, 1.0, 0);
-        //tree.add(point);
-        //tree.add(point);
-        //tree.add(point);
-        //tree.add(point);
-        //tree.add(point);
-        //tree.add(point);
-        //tree.add(point);
-        //tree.add(point);
-        //tree.add(point);
-        //
-        //System.out.println(tree);
-        //while (tree.contains(point)){
-        //    tree.remove(point);
-        //    System.out.println(tree);
-        //}
+        // Instantiate Model
+        RouteModel model = new RouteModel(osmDataList);
 
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-
 
         // ################## READ AGENTS #######################################
         System.out.println("Please give the number of available agents.");
@@ -84,10 +67,16 @@ public class Main {
             parts = line.split(",");
             float initLat = Float.parseFloat(parts[0]);
             float initLon = Float.parseFloat(parts[1]);
-            KdTree.XYZPoint initPosition = new KdTree.XYZPoint(initLon, initLat);
-            agentsPositions.add(new KdTree.XYZPoint(initLon, initLat));
+            if(model.isInBounds(initLat, initLon)) {
+                KdTree.XYZPoint initPosition = new KdTree.XYZPoint(initLon, initLat);
+                agentsPositions.add(new KdTree.XYZPoint(initLon, initLat));
 
-            agentDistr.addAgentsPosition(initPosition);
+                agentDistr.addAgentsPosition(initPosition);
+            }
+            else{
+                System.out.println("Agent's location " + initLat + "," + initLon + " is out of bounds!");
+                return;
+            }
 
         }
 
@@ -103,6 +92,11 @@ public class Main {
             parts = line.split(",");
             float startLat = Float.parseFloat(parts[0]);
             float startLon = Float.parseFloat(parts[1]);
+            if(!model.isInBounds(startLat, startLon)){
+                System.out.println("Coordinates " + startLat + "," + startLon + " is out of bounds!");
+                return;
+            }
+            // init the new point
             KdTree.XYZPoint startPoint = new KdTree.XYZPoint(startLon, startLat);
 
             // ##### DESTINATION ####
@@ -110,8 +104,14 @@ public class Main {
             parts = line.split(",");
             float endLat = Float.parseFloat(parts[0]);
             float endLon = Float.parseFloat(parts[1]);
+            if(!model.isInBounds(endLat, endLon)){
+                System.out.println("Coordinates " + endLat + "," + endLon + " is out of bounds!");
+                return;
+            }
+            // init the new point
             KdTree.XYZPoint endPoint = new KdTree.XYZPoint(endLon, endLat);
 
+            // add every new pkg to the tree and assign it to an agent
             agentDistr.assignNewPackage(startPoint, endPoint);
         }
 
@@ -124,11 +124,11 @@ public class Main {
             int agentIdx = agentDistr.getAgents().indexOf(agentList);
             KdTree.XYZPoint agentPos = agentsPositions.get(agentIdx);
             sources.add(agentPos);
-            // add the first source as the first agents destination
+            // add agents position as the first destination
             destinations.add(agentList.get(0));
 
             // Split the points in source and destination points. Every pkg has the form of source, destination.
-            // for i=0 we have the initial position of the agent
+            // for i=0 we have the initial position of the agent, so we skip it
             for(int i=1; i < agentList.size(); i++){
                 if(i % 2 == 1)
                     sources.add(new KdTree.XYZPoint(agentList.get(i).x, agentList.get(i).y));
@@ -136,15 +136,13 @@ public class Main {
                     destinations.add(new KdTree.XYZPoint(agentList.get(i).x, agentList.get(i).y));
             }
 
-            // Instantiate Model
-            RouteModel model = new RouteModel(osmDataList);
+
             // Apply routePlanner in each agent's list separately
             RoutePlanning routePlanner = new RoutePlanning(model, sources, destinations, agentPos);
 
             sources.clear();
             destinations.clear();
         }
-
     }
 }
 

@@ -16,16 +16,12 @@ public class Road {
 
     // Define the Type enum here
     public enum Type {
-        Cycleway, Footway, Invalid, Motorway, Primary, Residential,
+        Footway, Invalid, Primary, Residential,
         Secondary, Service, Tertiary, Trunk, Unclassified
     }
 
     public Type getType() {
         return type;
-    }
-
-    public int getId() {
-        return wayNum;
     }
 
     public String getRef(){return wayRef;}
