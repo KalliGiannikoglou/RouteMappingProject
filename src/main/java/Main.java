@@ -24,7 +24,7 @@ public class Main {
         String osmDataFile = "volos.osm";
         Optional<byte[]> osmDataOptional = readFile(osmDataFile);
         if (osmDataOptional.isEmpty()) {
-            System.out.println("Failed to read.");
+            System.out.println("Failed to read!");
             return;
         }
 
