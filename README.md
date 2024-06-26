@@ -11,6 +11,6 @@ The development was divided in 4 stages:
 3. Route Mapping between multiple source and multiple destination points.
 4. Assign packages to available delivery agents and repeat step 3.
 
-### Licence
+### License
 In our implementation K-D trees are used. 
 The code for this implementation belongs to Justin Wetherwell, is publicly available in this [repository](https://github.com/phishman3579/java-algorithms-implementation/blob/master/src/com/jwetherell/algorithms/data_structures/KdTree.java) and it is under Apache [license](https://github.com/phishman3579/java-algorithms-implementation/blob/master/LICENSE), allowing useage and modification with proper attribution to the original author.
