@@ -11,7 +11,7 @@ public class MapDisplay {
     // Google Static Maps API URL (Define window size)
     String apiUrl = "https://maps.googleapis.com/maps/api/staticmap?size=750x750&";
     // my API Key
-    String apiKey = "AIzaSyCv3MQCBBotp_djJT9hAD4KsMfBMqQUyLY";
+    String apiKey = "";
 
     // Default Constructor
     public MapDisplay(RouteModel model) {
